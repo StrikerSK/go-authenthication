@@ -13,7 +13,7 @@ var users = map[string]string{
 	"user2": "password2",
 }
 
-const tokenName = "custom_token"
+const tokenName = "session_token"
 
 // Create a struct that models the structure of a user, both in the request body, and in the DB
 type Credentials struct {
