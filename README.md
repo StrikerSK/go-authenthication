@@ -2,6 +2,9 @@
 
 This repository is looking for solutions to creating and resolving user sessions.
 
+#Prerequisites:
+* `.env` files should be present as in example
+
 ##Usage:
 From root directory run:
 1. Run `docker-compose up` 

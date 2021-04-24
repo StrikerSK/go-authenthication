@@ -1,4 +1,4 @@
-package src
+package redis
 
 import (
 	"encoding/json"
@@ -44,10 +44,8 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 
 	// Create a new random session token
 	sessionToken := uuid.NewV4().String()
-	// Set the token in the cache, along with the user whom it represents
-	// The token has an expiry time of 120 seconds
-	_, err = cache.Do("SETEX", sessionToken, "120", creds.Username)
-	if err != nil {
+
+	if err = Connection.CreateCache(sessionToken, creds.Username); err != nil {
 		// If there is an error in setting the cache, return an internal server error
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -78,12 +76,13 @@ func Welcome(w http.ResponseWriter, r *http.Request) {
 	sessionToken := c.Value
 
 	// We then get the name of the user from our cache, where we set the session token
-	response, err := cache.Do("GET", sessionToken)
+	response, err := Connection.RetrieveCache(sessionToken)
 	if err != nil {
 		// If there is an error fetching from cache, return an internal server error status
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	if response == nil {
 		// If the session token is not present in cache, return an unauthorized error
 		w.WriteHeader(http.StatusUnauthorized)
