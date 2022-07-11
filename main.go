@@ -4,21 +4,28 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	"github.com/strikersk/user-auth/src/handlers"
 	"github.com/strikersk/user-auth/src/jwt"
-	"github.com/strikersk/user-auth/src/redis"
+	userRepository "github.com/strikersk/user-auth/src/repository"
+	userServices "github.com/strikersk/user-auth/src/service"
 	"net/http"
 )
 
 func main() {
 	myRouter := mux.NewRouter()
 
-	redisRouter := myRouter.PathPrefix("/redis").Subrouter()
-	redisRouter.HandleFunc("/login", redis.Signin).Methods("POST")
-	redisRouter.HandleFunc("/welcome", redis.Welcome).Methods("GET")
+	jwtConfig := jwt.NewConfigStruct()
+	userRepo := userRepository.NewLocalUserRepository()
+	userCache := userRepository.NewCacheConfig()
+	userService := userServices.NewLocalUserRepository(&userRepo, userCache)
 
-	jwtRouter := myRouter.PathPrefix("/jwt").Subrouter()
-	jwtRouter.HandleFunc("/login", jwt.Login).Methods("POST")
-	jwtRouter.HandleFunc("/welcome", jwt.Welcome).Methods("Get")
+	userHandling := handlers.NewUserHandler(&userService)
+	jwtHandling := handlers.NewJwtHandler(&userService, jwtConfig)
+	cookiesHandling := handlers.NewCookiesHandler("session_token", &userService)
+
+	userHandling.EnrichRouter(myRouter)
+	jwtHandling.EnrichRouter(myRouter)
+	cookiesHandling.EnrichRouter(myRouter)
 
 	fmt.Println(http.ListenAndServe(":5000", cors.AllowAll().Handler(myRouter)))
 }
