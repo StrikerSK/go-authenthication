@@ -5,11 +5,13 @@ This repository is looking for solutions to creating and resolving user sessions
 #Prerequisites:
 * `.env` files should be present as in example
 
-##Usage:
+## Usage:
 From root directory run:
 1. Run `docker-compose up` 
 2. Run `go build`
 3. Run `./user-auth`
+
+Application will run on port `5000`, to see example use this [collection](./postman/UserAuthRequests.json) in Postman.
 
 ## Resources: 
 * [Using JWT for Authentication in a Golang Application](https://learn.vonage.com/blog/2020/03/13/using-jwt-for-authentication-in-a-golang-application-dr/)

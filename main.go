@@ -27,5 +27,5 @@ func main() {
 	jwtHandling.EnrichRouter(myRouter)
 	cookiesHandling.EnrichRouter(myRouter)
 
-	fmt.Println(http.ListenAndServe(":4000", cors.AllowAll().Handler(myRouter)))
+	fmt.Println(http.ListenAndServe(":5000", cors.AllowAll().Handler(myRouter)))
 }
