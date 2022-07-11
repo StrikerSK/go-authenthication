@@ -1,18 +1,46 @@
 {
 	"info": {
-		"_postman_id": "f50fd1d6-e579-4a4a-9da5-5c50e003841b",
-		"name": "Auth",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"_postman_id": "1116e32b-2e97-4b7a-a99d-6250458d67e3",
+		"name": "Authorization App",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4310016"
 	},
 	"item": [
 		{
-			"name": "Login",
+			"name": "Register user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"tester\",\n\t\"password\": \"tester\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{HOST_URL}}/user/register",
+					"host": [
+						"{{HOST_URL}}"
+					],
+					"path": [
+						"user",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login User - JWT",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.environment.set(\"SESSION_TOKEN\", pm.cookies.get(\"session_token\"));"
+							"pm.collectionVariables.set(\"JWT_TOKEN\", pm.response.headers.get(\"Authorization\"));"
 						],
 						"type": "text/javascript"
 					}
@@ -23,7 +51,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\": \"user2\",\n    \"password\": \"password2\"\n}",
+					"raw": "{\n    \"username\": \"test\",\n\t\"password\": \"test\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -31,69 +59,10 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:{{PORT}}/redis/login",
+					"raw": "{{HOST_URL}}/jwt/login",
 					"host": [
-						"localhost"
+						"{{HOST_URL}}"
 					],
-					"port": "{{PORT}}",
-					"path": [
-						"redis",
-						"login"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Welcome",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "localhost:{{PORT}}/redis/welcome",
-					"host": [
-						"localhost"
-					],
-					"port": "{{PORT}}",
-					"path": [
-						"redis",
-						"welcome"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "JWT Login",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.environment.set(\"SESSION_TOKEN\", pm.response.headers.get(\"Authentication\"));"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"username\": \"username\",\n    \"password\": \"password\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "localhost:{{PORT}}/jwt/login",
-					"host": [
-						"localhost"
-					],
-					"port": "{{PORT}}",
 					"path": [
 						"jwt",
 						"login"
@@ -103,22 +72,21 @@
 			"response": []
 		},
 		{
-			"name": "JWT Welcome",
+			"name": "Welcome User - JWT",
 			"request": {
 				"method": "GET",
 				"header": [
 					{
-						"key": "Authentication",
-						"value": "{{SESSION_TOKEN}}",
+						"key": "Authorization",
+						"value": "{{JWT_TOKEN}}",
 						"type": "text"
 					}
 				],
 				"url": {
-					"raw": "localhost:{{PORT}}/jwt/welcome",
+					"raw": "{{HOST_URL}}/jwt/welcome",
 					"host": [
-						"localhost"
+						"{{HOST_URL}}"
 					],
-					"port": "{{PORT}}",
 					"path": [
 						"jwt",
 						"welcome"
@@ -126,6 +94,82 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Login User - Cookies",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"test\",\n\t\"password\": \"test\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{HOST_URL}}/cookies/login",
+					"host": [
+						"{{HOST_URL}}"
+					],
+					"path": [
+						"cookies",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Welcome User - JWT Copy",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{HOST_URL}}/cookies/welcome",
+					"host": [
+						"{{HOST_URL}}"
+					],
+					"path": [
+						"cookies",
+						"welcome"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "HOST_URL",
+			"value": "localhost:4000",
+			"type": "string"
+		},
+		{
+			"key": "JWT_TOKEN",
+			"value": ""
 		}
 	]
 }
