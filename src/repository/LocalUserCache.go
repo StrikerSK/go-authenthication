@@ -40,11 +40,12 @@ func (receiver UserCache) RetrieveCache(ctx context.Context, userName string) (d
 	var user domain.User
 
 	val, err := receiver.Cache.Get(ctx, userName).Result()
-	if err != redis.Nil {
+	if err == redis.Nil {
+		log.Println("user not found in cache")
 		return domain.User{}, false
 	}
 
 	_ = json.Unmarshal([]byte(val), &user)
-	log.Println("user", user)
+	//log.Println("Cache user", user)
 	return user, true
 }

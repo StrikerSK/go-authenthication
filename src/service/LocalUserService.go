@@ -32,9 +32,10 @@ func (r *LocalUserService) ReadUser(ctx context.Context, username string) (domai
 		if err = r.cache.CreateCache(ctx, user); err != nil {
 			return domain.User{}, err
 		}
-
+		//log.Println("persistedUser", user)
 		return user, nil
 	} else {
+		//log.Println("cachedUser", cachedUser)
 		return cachedUser, nil
 	}
 }

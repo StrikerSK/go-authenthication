@@ -5,7 +5,7 @@ import (
 	"github.com/strikersk/user-auth/src/domain"
 )
 
-type CustomClaims struct {
+type UserClaims struct {
 	User domain.User
 	jwt.StandardClaims
 }

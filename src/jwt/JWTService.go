@@ -30,10 +30,10 @@ func retrieveFromEnvironment() (secret string) {
 	return
 }
 
-func (receiver JWTConfiguration) ParseToken(signedToken string) (claims *CustomClaims, err error) {
+func (receiver JWTConfiguration) ParseToken(signedToken string) (claims *UserClaims, err error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
-		&CustomClaims{},
+		&UserClaims{},
 		func(token *jwt.Token) (interface{}, error) {
 			return []byte(receiver.JwtSecret), nil
 		},
@@ -43,7 +43,7 @@ func (receiver JWTConfiguration) ParseToken(signedToken string) (claims *CustomC
 		return
 	}
 
-	claims, ok := token.Claims.(*CustomClaims)
+	claims, ok := token.Claims.(*UserClaims)
 	if !ok {
 		err = errors.New("could not parse claims")
 		return
@@ -58,7 +58,7 @@ func (receiver JWTConfiguration) ParseToken(signedToken string) (claims *CustomC
 }
 
 func (receiver JWTConfiguration) GenerateToken(user domain.User) (signedToken string, err error) {
-	claims := &CustomClaims{
+	claims := &UserClaims{
 		User: user,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Local().Add(time.Second * 600).Unix(),

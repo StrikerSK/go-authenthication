@@ -30,9 +30,17 @@ func (h JwtHandler) EnrichRouter(router *mux.Router) {
 }
 
 func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var user domain.User
+	var reqUser domain.User
 	// Get the JSON body and decode into credentials
-	err := json.NewDecoder(r.Body).Decode(&user)
+	err := json.NewDecoder(r.Body).Decode(&reqUser)
+	if err != nil {
+		// If the structure of the body is wrong, return an HTTP error
+		w.WriteHeader(http.StatusBadRequest)
+		log.Printf("Login() error: %s\n", err)
+		return
+	}
+
+	persistedUser, err := h.Service.ReadUser(r.Context(), reqUser.Username)
 	if err != nil {
 		// If the structure of the body is wrong, return an HTTP error
 		w.WriteHeader(http.StatusBadRequest)
@@ -43,18 +51,18 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 	// If a password exists for the given user
 	// AND, if it is the same as the password we received, the we can move ahead
 	// if NOT, then we return an "Unauthorized" status
-	if user.Password != user.Password {
+	if reqUser.Password != persistedUser.Password {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	userToken, err := h.Config.GenerateToken(user)
+	userToken, err := h.Config.GenerateToken(reqUser)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	w.Header().Set("Authentication", userToken)
+	w.Header().Set("Authorization", userToken)
 }
 
 func (h JwtHandler) Welcome(w http.ResponseWriter, r *http.Request) {
