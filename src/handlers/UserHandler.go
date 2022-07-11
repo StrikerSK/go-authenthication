@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/strikersk/user-auth/src/domain"
-	"github.com/strikersk/user-auth/src/jwt"
 	"github.com/strikersk/user-auth/src/ports"
 	"net/http"
 )
@@ -17,9 +16,9 @@ func NewUserHandler(service ports.IUserService) UserHandler {
 	return UserHandler{service: service}
 }
 
-func EnrichRouter(router *mux.Router) {
+func (h UserHandler) EnrichRouter(router *mux.Router) {
 	jwtRouter := router.PathPrefix("/user").Subrouter()
-	jwtRouter.HandleFunc("/register", jwt.Login).Methods("POST")
+	jwtRouter.HandleFunc("/register", h.createUser).Methods("POST")
 }
 
 func (h UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +28,7 @@ func (h UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = h.service.CreateUser(user)
+	_ = h.service.CreateUser(r.Context(), user)
 
 	w.WriteHeader(http.StatusCreated)
 	return

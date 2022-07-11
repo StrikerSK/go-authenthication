@@ -1,8 +1,11 @@
 package ports
 
-import "github.com/strikersk/user-auth/src/domain"
+import (
+	"context"
+	"github.com/strikersk/user-auth/src/domain"
+)
 
 type IUserService interface {
-	CreateUser(domain.User) error
-	ReadUser(string) (domain.User, error)
+	CreateUser(context.Context, domain.User) error
+	ReadUser(context.Context, string) (domain.User, error)
 }

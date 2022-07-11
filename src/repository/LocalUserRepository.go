@@ -10,7 +10,14 @@ type LocalUserRepository struct {
 }
 
 func NewLocalUserRepository() LocalUserRepository {
-	return LocalUserRepository{}
+	var localRepository LocalUserRepository
+	localRepository.Users = []domain.User{
+		{
+			Username: "test",
+			Password: "test",
+		},
+	}
+	return localRepository
 }
 
 func (r *LocalUserRepository) CreateUser(user domain.User) error {

@@ -1,20 +1,25 @@
 package userRepository
 
 import (
-	"github.com/gomodule/redigo/redis"
+	"context"
+	"encoding/json"
+	"github.com/go-redis/redis/v9"
+	"github.com/strikersk/user-auth/src/domain"
+	"log"
+	"time"
 )
 
 type UserCache struct {
-	Cache     redis.Conn
+	Cache     *redis.Client
 	TokenName string
 }
 
 func NewCacheConfig() (connection UserCache) {
-	// Initialize the redis connection to a redis instance running on your local machine
-	conn, err := redis.Dial("tcp", "localhost:6379")
-	if err != nil {
-		panic(err)
-	}
+	conn := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
 
 	// Assign the connection to the package level `cache` variable
 	connection.Cache = conn
@@ -22,18 +27,24 @@ func NewCacheConfig() (connection UserCache) {
 	return
 }
 
-func (receiver UserCache) CreateCache(sessionToken string, input interface{}) error {
-	// Set the token in the cache, along with the user whom it represents
-	// The token has an expiry time of 120 seconds
-	_, err := receiver.Cache.Do("SETEX", sessionToken, "120", input)
+func (receiver UserCache) CreateCache(ctx context.Context, inputUser domain.User) error {
+	err := receiver.Cache.Set(ctx, inputUser.Username, inputUser, time.Second*300).Err()
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	return nil
 }
 
-func (receiver UserCache) RetrieveCache(sessionToken string) (interface{}, error) {
-	// We then get the name of the user from our cache, where we set the session token
-	return receiver.Cache.Do("GET", sessionToken)
+func (receiver UserCache) RetrieveCache(ctx context.Context, userName string) (domain.User, bool) {
+	var user domain.User
+
+	val, err := receiver.Cache.Get(ctx, userName).Result()
+	if err != redis.Nil {
+		return domain.User{}, false
+	}
+
+	_ = json.Unmarshal([]byte(val), &user)
+	log.Println("user", user)
+	return user, true
 }

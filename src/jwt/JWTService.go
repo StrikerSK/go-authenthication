@@ -4,26 +4,23 @@ import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/joho/godotenv"
+	"github.com/strikersk/user-auth/src/domain"
 	"log"
 	"os"
 	"time"
 )
 
-var Configuration = InitJwtConfig()
-
-type ConfigStruct struct {
+type JWTConfiguration struct {
 	JwtSecret string
 }
 
-func InitJwtConfig() ConfigStruct {
-	var jwtConfig ConfigStruct
-
-	jwtConfig.JwtSecret = initEnvFile()
-
-	return jwtConfig
+func NewConfigStruct() JWTConfiguration {
+	return JWTConfiguration{
+		JwtSecret: retrieveFromEnvironment(),
+	}
 }
 
-func initEnvFile() (secret string) {
+func retrieveFromEnvironment() (secret string) {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -33,12 +30,7 @@ func initEnvFile() (secret string) {
 	return
 }
 
-type CustomClaims struct {
-	User User
-	jwt.StandardClaims
-}
-
-func (receiver ConfigStruct) ParseToken(signedToken string) (claims *CustomClaims, err error) {
+func (receiver JWTConfiguration) ParseToken(signedToken string) (claims *CustomClaims, err error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&CustomClaims{},
@@ -65,11 +57,11 @@ func (receiver ConfigStruct) ParseToken(signedToken string) (claims *CustomClaim
 	return
 }
 
-func (receiver ConfigStruct) GenerateToken(user User) (signedToken string, err error) {
+func (receiver JWTConfiguration) GenerateToken(user domain.User) (signedToken string, err error) {
 	claims := &CustomClaims{
 		User: user,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Local().Add(time.Second * 15).Unix(),
+			ExpiresAt: time.Now().Local().Add(time.Second * 600).Unix(),
 		},
 	}
 
