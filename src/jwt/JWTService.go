@@ -2,7 +2,7 @@ package jwt
 
 import (
 	"errors"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/joho/godotenv"
 	"github.com/strikersk/user-auth/src/domain"
 	"log"
