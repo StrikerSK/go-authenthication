@@ -30,31 +30,30 @@ func (h CookiesHandler) EnrichRouter(router *mux.Router) {
 }
 
 func (h CookiesHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var reqUser domain.Credentials
+	var userCredentials domain.UserCredentials
+
 	// Get the JSON body and decode into credentials
-	err := json.NewDecoder(r.Body).Decode(&reqUser)
+	err := json.NewDecoder(r.Body).Decode(&userCredentials)
 	if err != nil {
 		// If the structure of the body is wrong, return an HTTP error
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	persistedUser, err := h.Service.ReadUser(r.Context(), reqUser.Username)
+	persistedUser, err := h.Service.ReadUser(r.Context(), userCredentials.Username)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	// If a password exists for the given user
-	// AND, if it is the same as the password we received, the we can move ahead
-	// if NOT, then we return an "Unauthorized" status
-	if persistedUser.Password != reqUser.Password {
+	// If it is the same as the password we received, then we can move ahead if NOT, then we return an "Unauthorized" status
+	if persistedUser.Password != userCredentials.Password {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	// Create a new random session token
-	sessionToken := base64.URLEncoding.EncodeToString([]byte(reqUser.Username))
+	sessionToken := base64.URLEncoding.EncodeToString([]byte(userCredentials.Username))
 
 	// Finally, we set the client cookie for "session_token" as the session token we just generated
 	// we also set an expiry time of 120 seconds, the same as the cache

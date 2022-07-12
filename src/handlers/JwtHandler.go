@@ -30,7 +30,7 @@ func (h JwtHandler) EnrichRouter(router *mux.Router) {
 }
 
 func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var reqUser domain.User
+	var reqUser domain.UserCredentials
 	// Get the JSON body and decode into credentials
 	err := json.NewDecoder(r.Body).Decode(&reqUser)
 	if err != nil {
@@ -56,7 +56,7 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userToken, err := h.Config.GenerateToken(reqUser)
+	userToken, err := h.Config.GenerateToken(persistedUser)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
