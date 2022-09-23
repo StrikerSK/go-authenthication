@@ -3,8 +3,7 @@ package domain
 import "encoding/json"
 
 type User struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	UserCredentials
 }
 
 func (u User) MarshalBinary() ([]byte, error) {

@@ -13,8 +13,10 @@ func NewLocalUserRepository() LocalUserRepository {
 	var localRepository LocalUserRepository
 	localRepository.Users = []domain.User{
 		{
-			Username: "test",
-			Password: "test",
+			domain.UserCredentials{
+				Username: "test",
+				Password: "test",
+			},
 		},
 	}
 	return localRepository
