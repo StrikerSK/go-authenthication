@@ -21,6 +21,11 @@ func NewCacheConfig() (connection UserCache) {
 		DB:       0,  // use default DB
 	})
 
+	err := conn.Set(context.Background(), "test", "test", 0).Err()
+	if err != nil {
+		panic(err)
+	}
+
 	// Assign the connection to the package level `cache` variable
 	connection.Cache = conn
 	connection.TokenName = "session_token"
@@ -30,6 +35,7 @@ func NewCacheConfig() (connection UserCache) {
 func (receiver UserCache) CreateCache(ctx context.Context, inputUser domain.User) error {
 	err := receiver.Cache.Set(ctx, inputUser.Username, inputUser, time.Second*300).Err()
 	if err != nil {
+		//return errors.NewCacheError().FromError(err)
 		panic(err)
 	}
 

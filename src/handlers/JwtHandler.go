@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -30,9 +31,9 @@ func (h JwtHandler) EnrichRouter(router *mux.Router) {
 }
 
 func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var reqUser domain.UserCredentials
+	var credentials domain.UserCredentials
 	// Get the JSON body and decode into credentials
-	err := json.NewDecoder(r.Body).Decode(&reqUser)
+	err := json.NewDecoder(r.Body).Decode(&credentials)
 	if err != nil {
 		// If the structure of the body is wrong, return an HTTP error
 		w.WriteHeader(http.StatusBadRequest)
@@ -40,29 +41,15 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	persistedUser, err := h.Service.ReadUser(r.Context(), reqUser.Username)
+	token, err := h.Service.LoginUser(context.Background(), credentials)
 	if err != nil {
 		// If the structure of the body is wrong, return an HTTP error
-		w.WriteHeader(http.StatusBadRequest)
-		log.Printf("Login() error: %s\n", err)
-		return
-	}
-
-	// If a password exists for the given user
-	// AND, if it is the same as the password we received, the we can move ahead
-	// if NOT, then we return an "Unauthorized" status
-	if reqUser.Password != persistedUser.Password {
 		w.WriteHeader(http.StatusUnauthorized)
+		log.Printf("Login error: %s\n", err)
 		return
 	}
 
-	userToken, err := h.Config.GenerateToken(persistedUser)
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	w.Header().Set("Authorization", userToken)
+	w.Header().Set("Authorization", token)
 }
 
 func (h JwtHandler) Welcome(w http.ResponseWriter, r *http.Request) {

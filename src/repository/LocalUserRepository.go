@@ -1,8 +1,8 @@
 package userRepository
 
 import (
-	"errors"
 	"github.com/strikersk/user-auth/src/domain"
+	appErrors "github.com/strikersk/user-auth/src/errors"
 )
 
 type LocalUserRepository struct {
@@ -25,7 +25,7 @@ func NewLocalUserRepository() LocalUserRepository {
 func (r *LocalUserRepository) CreateUser(user domain.User) error {
 	for _, tmpUser := range r.Users {
 		if user.Username == tmpUser.Username {
-			return errors.New("user already created")
+			return appErrors.NewRepositoryError().FromMessage("user already created")
 		}
 	}
 
@@ -40,5 +40,5 @@ func (r *LocalUserRepository) ReadUser(username string) (domain.User, error) {
 		}
 	}
 
-	return domain.User{}, errors.New("user cannot be found")
+	return domain.User{}, appErrors.NewRepositoryError().FromMessage("user cannot be found")
 }

@@ -8,4 +8,5 @@ import (
 type IUserService interface {
 	CreateUser(context.Context, domain.User) error
 	ReadUser(context.Context, string) (domain.User, error)
+	LoginUser(context.Context, domain.UserCredentials) (string, error)
 }

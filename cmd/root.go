@@ -41,7 +41,8 @@ var rootCmd = &cobra.Command{
 		jwtConfig := userJWT.NewConfigStruct()
 		userRepo := userRepository.NewLocalUserRepository()
 		userCache := userRepository.NewCacheConfig()
-		userService := userServices.NewLocalUserRepository(&userRepo, userCache)
+
+		userService := userServices.NewLocalUserRepository(&userRepo, userCache, jwtConfig)
 
 		userHandling := userHandlers.NewUserHandler(&userService)
 		jwtHandling := userHandlers.NewJwtHandler(&userService, jwtConfig)
