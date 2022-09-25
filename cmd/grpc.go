@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	authClient "github.com/strikersk/user-auth/src/client"
 	userJWT "github.com/strikersk/user-auth/src/jwt"
 	userRepository "github.com/strikersk/user-auth/src/repository"
 	userGrpcServer "github.com/strikersk/user-auth/src/server"
@@ -29,6 +30,9 @@ var grpcCmd = &cobra.Command{
 
 			userService := userServices.NewLocalUserRepository(&userRepo, userCache, jwtConfig)
 			userGrpcServer.CreateAuthorizationServer(&userService)
+		case "client":
+			client := authClient.NewAuthorizationSample()
+			client.LoginUser()
 		default:
 			panic("Unknown mode")
 		}
