@@ -1,5 +1,5 @@
 /*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+Copyright © 2022 Teh|Striker
 */
 package cmd
 
@@ -29,10 +29,10 @@ var grpcCmd = &cobra.Command{
 			jwtConfig := userJWT.NewConfigStruct()
 
 			userService := userServices.NewLocalUserRepository(&userRepo, userCache, jwtConfig)
-			userGrpcServer.CreateAuthorizationServer(&userService)
+			userGrpcServer.NewAuthorizationServer(&userService).RunServer()
 		case "client":
 			client := authClient.NewAuthorizationSample()
-			client.LoginUser()
+			client.RegisterUser()
 		default:
 			panic("Unknown mode")
 		}

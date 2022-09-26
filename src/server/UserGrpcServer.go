@@ -19,6 +19,28 @@ type AuthorizationServer struct {
 	auth.UnimplementedAuthorizationServiceServer
 }
 
+func NewAuthorizationServer(service userPorts.IUserService) *AuthorizationServer {
+	return &AuthorizationServer{
+		service: service,
+	}
+}
+
+func (c *AuthorizationServer) RunServer() {
+	lis, err := net.Listen("tcp", ":9000")
+	if err != nil {
+		log.Printf("Server init: %v\n", err)
+		os.Exit(1)
+	}
+
+	grpcServer := grpc.NewServer()
+	auth.RegisterAuthorizationServiceServer(grpcServer, c)
+
+	if err = grpcServer.Serve(lis); err != nil {
+		log.Printf("Server init: %v\n", err)
+		os.Exit(1)
+	}
+}
+
 func (c *AuthorizationServer) RegisterUser(ctx context.Context, in *auth.RegisterRequest) (*auth.RegisterResponse, error) {
 	user := userDomain.User{
 		UserCredentials: userDomain.UserCredentials{
@@ -66,22 +88,4 @@ func (c *AuthorizationServer) LoginUser(ctx context.Context, in *auth.LoginReque
 	}
 
 	return response, nil
-}
-
-func CreateAuthorizationServer(service userPorts.IUserService) {
-	lis, err := net.Listen("tcp", ":9000")
-	if err != nil {
-		log.Printf("Server init: %v\n", err)
-		os.Exit(1)
-	}
-
-	grpcServer := grpc.NewServer()
-	auth.RegisterAuthorizationServiceServer(grpcServer, &AuthorizationServer{
-		service: service,
-	})
-
-	if err = grpcServer.Serve(lis); err != nil {
-		log.Printf("Server init: %v\n", err)
-		os.Exit(1)
-	}
 }
