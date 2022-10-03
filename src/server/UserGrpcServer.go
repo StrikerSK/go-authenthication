@@ -56,7 +56,7 @@ func (c *AuthorizationServer) RegisterUser(ctx context.Context, in *auth.Registe
 		return &auth.RegisterResponse{
 			Status: "Registration failed",
 			Error:  err.Error(),
-		}, err
+		}, status.Error(codes.Internal, err.Error())
 	}
 
 	response := &auth.RegisterResponse{

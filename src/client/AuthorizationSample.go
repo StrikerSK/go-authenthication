@@ -28,7 +28,7 @@ func (r *AuthorizationSample) RegisterUser() {
 
 	log.Println("Attempting to register user")
 	if err := r.client.RegisterUser(context.Background(), req); err != nil {
-		panic(err)
+		log.Println(err)
 	} else {
 		log.Println("User registered successfully")
 	}
