@@ -24,7 +24,7 @@ func NewCookiesHandler(tokenName string, service ports.IUserService) CookiesHand
 }
 
 func (h CookiesHandler) EnrichRouter(router *mux.Router) {
-	jwtRouter := router.PathPrefix("/cookies").Subrouter()
+	jwtRouter := router.PathPrefix("/user").Subrouter()
 	jwtRouter.HandleFunc("/login", h.Login).Methods(http.MethodPost)
 	jwtRouter.HandleFunc("/welcome", h.Welcome).Methods(http.MethodGet)
 }

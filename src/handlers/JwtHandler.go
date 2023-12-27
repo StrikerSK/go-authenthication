@@ -5,26 +5,25 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/strikersk/user-auth/src/domain"
-	"github.com/strikersk/user-auth/src/jwt"
 	"github.com/strikersk/user-auth/src/ports"
 	"log"
 	"net/http"
 )
 
 type JwtHandler struct {
-	Service ports.IUserService
-	Config  jwt.JWTConfiguration
+	userService ports.IUserService
+	authService ports.IAuthorizationService
 }
 
-func NewJwtHandler(service ports.IUserService, config jwt.JWTConfiguration) JwtHandler {
+func NewJwtHandler(userService ports.IUserService, authService ports.IAuthorizationService) JwtHandler {
 	return JwtHandler{
-		Service: service,
-		Config:  config,
+		userService: userService,
+		authService: authService,
 	}
 }
 
 func (h JwtHandler) EnrichRouter(router *mux.Router) {
-	jwtRouter := router.PathPrefix("/jwt").Subrouter()
+	jwtRouter := router.PathPrefix("/user").Subrouter()
 	jwtRouter.HandleFunc("/login", h.Login).Methods(http.MethodPost)
 	jwtRouter.HandleFunc("/welcome", h.Welcome).Methods(http.MethodGet)
 }
@@ -40,7 +39,7 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	persistedUser, err := h.Service.ReadUser(r.Context(), reqUser.Username)
+	persistedUser, err := h.userService.ReadUser(r.Context(), reqUser.Username)
 	if err != nil {
 		// If the structure of the body is wrong, return an HTTP error
 		w.WriteHeader(http.StatusBadRequest)
@@ -56,7 +55,7 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userToken, err := h.Config.GenerateToken(persistedUser)
+	userToken, err := h.authService.GenerateToken(persistedUser)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
@@ -67,7 +66,7 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 func (h JwtHandler) Welcome(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Authorization")
-	user, err := h.Config.ParseToken(token)
+	username, err := h.authService.ParseToken(token)
 	if err != nil {
 		// If the structure of the body is wrong, return an HTTP error
 		w.WriteHeader(http.StatusBadRequest)
@@ -76,5 +75,5 @@ func (h JwtHandler) Welcome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Finally, return the welcome message to the user
-	_, _ = w.Write([]byte(fmt.Sprintf("Welcome %s!", user.User.Username)))
+	_, _ = w.Write([]byte(fmt.Sprintf("Welcome %s!", username)))
 }

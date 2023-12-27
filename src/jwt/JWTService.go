@@ -3,34 +3,21 @@ package jwt
 import (
 	"errors"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/joho/godotenv"
 	"github.com/strikersk/user-auth/src/domain"
-	"log"
-	"os"
 	"time"
 )
 
-type JWTConfiguration struct {
+type JWTService struct {
 	JwtSecret string
 }
 
-func NewConfigStruct() JWTConfiguration {
-	return JWTConfiguration{
+func NewConfigStruct() JWTService {
+	return JWTService{
 		JwtSecret: retrieveFromEnvironment(),
 	}
 }
 
-func retrieveFromEnvironment() (secret string) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	secret = os.Getenv("TOKEN_SECRET")
-	return
-}
-
-func (receiver JWTConfiguration) ParseToken(signedToken string) (claims *UserClaims, err error) {
+func (receiver JWTService) ParseToken(signedToken string) (string, error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&UserClaims{},
@@ -40,24 +27,24 @@ func (receiver JWTConfiguration) ParseToken(signedToken string) (claims *UserCla
 	)
 
 	if err != nil {
-		return
+		return "", err
 	}
 
 	claims, ok := token.Claims.(*UserClaims)
 	if !ok {
 		err = errors.New("could not parse claims")
-		return
+		return "", err
 	}
 
 	if claims.ExpiresAt < time.Now().Local().Unix() {
 		err = errors.New("JWT is expired")
-		return
+		return "", err
 	}
 
-	return
+	return claims.User.Username, nil
 }
 
-func (receiver JWTConfiguration) GenerateToken(user domain.UserDTO) (signedToken string, err error) {
+func (receiver JWTService) GenerateToken(user domain.UserDTO) (signedToken string, err error) {
 	claims := &UserClaims{
 		User: user,
 		StandardClaims: jwt.StandardClaims{
