@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/strikersk/user-auth/config"
 	"github.com/strikersk/user-auth/src/domain"
 	"github.com/strikersk/user-auth/src/ports"
 	"net/http"
@@ -12,14 +12,18 @@ import (
 )
 
 type CookiesHandler struct {
-	TokenName string
-	Service   ports.IUserService
+	tokenName    string
+	expiration   time.Duration
+	userService  ports.IUserService
+	tokenService ports.IAuthorizationService
 }
 
-func NewCookiesHandler(tokenName string, service ports.IUserService) CookiesHandler {
+func NewCookiesHandler(userService ports.IUserService, tokenService ports.IAuthorizationService, configuration config.Authorization) CookiesHandler {
 	return CookiesHandler{
-		TokenName: tokenName,
-		Service:   service,
+		tokenName:    configuration.AuthorizationHeader,
+		expiration:   time.Duration(configuration.TokenExpiration),
+		userService:  userService,
+		tokenService: tokenService,
 	}
 }
 
@@ -40,7 +44,7 @@ func (h CookiesHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	persistedUser, err := h.Service.ReadUser(r.Context(), userCredentials.Username)
+	persistedUser, err := h.userService.ReadUser(r.Context(), userCredentials.Username)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -53,20 +57,24 @@ func (h CookiesHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a new random session token
-	sessionToken := base64.URLEncoding.EncodeToString([]byte(userCredentials.Username))
+	sessionToken, err := h.tokenService.GenerateToken(domain.UserDTO{UserCredentials: userCredentials})
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	// Finally, we set the client cookie for "session_token" as the session token we just generated
 	// we also set an expiry time of 120 seconds, the same as the cache
 	http.SetCookie(w, &http.Cookie{
-		Name:    h.TokenName,
+		Name:    h.tokenName,
 		Value:   sessionToken,
-		Expires: time.Now().Add(120 * time.Second),
+		Expires: time.Now().Add(h.expiration * time.Second),
 	})
 }
 
 func (h CookiesHandler) Welcome(w http.ResponseWriter, r *http.Request) {
 	// We can obtain the session token from the requests cookies, which come with every request
-	c, err := r.Cookie(h.TokenName)
+	c, err := r.Cookie(h.tokenName)
 	if err != nil {
 		if err == http.ErrNoCookie {
 			// If the cookie is not set, return an unauthorized status
@@ -81,20 +89,13 @@ func (h CookiesHandler) Welcome(w http.ResponseWriter, r *http.Request) {
 	sessionToken := c.Value
 
 	// We then get the name of the user from our cache, where we set the session token
-	response, err := base64.URLEncoding.DecodeString(sessionToken)
-
+	// Create a new random session token
+	username, err := h.tokenService.ParseToken(sessionToken)
 	if err != nil {
-		// If there is an error fetching from cache, return an internal server error status
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	if response == nil {
-		// If the session token is not present in cache, return an unauthorized error
-		w.WriteHeader(http.StatusUnauthorized)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	// Finally, return the welcome message to the user
-	_, _ = w.Write([]byte(fmt.Sprintf("Welcome %s!", response)))
+	_, _ = w.Write([]byte(fmt.Sprintf("Welcome %s!", username)))
 }

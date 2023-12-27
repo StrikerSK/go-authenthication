@@ -12,9 +12,7 @@ type Application struct {
 }
 
 type JWTConfiguration struct {
-	TokenExpiration     int    `mapstructure:"TokenExpiration"`
-	TokenEncoding       string `mapstructure:"TokenEncoding"`
-	AuthorizationHeader string `mapstructure:"AuthorizationHeader"`
+	TokenEncoding string `mapstructure:"TokenEncoding"`
 }
 
 type CookiesConfiguration struct {
@@ -23,9 +21,11 @@ type CookiesConfiguration struct {
 }
 
 type Authorization struct {
-	AuthorizationType string           `mapstructure:"AuthorizationType"`
-	ExcludedPaths     []string         `mapstructure:"ExcludedPaths"`
-	JWT               JWTConfiguration `mapstructure:"JWT"`
+	AuthorizationType   string           `mapstructure:"AuthorizationType"`
+	AuthorizationHeader string           `mapstructure:"AuthorizationHeader"`
+	TokenExpiration     int              `mapstructure:"TokenExpiration"`
+	ExcludedPaths       []string         `mapstructure:"ExcludedPaths"`
+	JWT                 JWTConfiguration `mapstructure:"JWT"`
 }
 
 type ApplicationConfiguration struct {

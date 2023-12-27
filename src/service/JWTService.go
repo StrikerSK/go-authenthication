@@ -16,7 +16,7 @@ type JWTService struct {
 func NewConfigStruct(authorization config.Authorization) JWTService {
 	return JWTService{
 		secret:     authorization.JWT.TokenEncoding,
-		expiration: time.Duration(authorization.JWT.TokenExpiration),
+		expiration: time.Duration(authorization.TokenExpiration),
 	}
 }
 
