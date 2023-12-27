@@ -1,7 +1,6 @@
 package userServices
 
 import (
-	"context"
 	"errors"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/strikersk/user-auth/config"
@@ -21,7 +20,7 @@ func NewConfigStruct(authorization config.Authorization) JWTService {
 	}
 }
 
-func (receiver JWTService) ParseToken(context context.Context, signedToken string) (string, error) {
+func (receiver JWTService) ParseToken(signedToken string) (string, error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&domain.UserClaims{},
@@ -48,7 +47,7 @@ func (receiver JWTService) ParseToken(context context.Context, signedToken strin
 	return claims.User.Username, nil
 }
 
-func (receiver JWTService) GenerateToken(context context.Context, user domain.UserDTO) (signedToken string, err error) {
+func (receiver JWTService) GenerateToken(user domain.UserDTO) (signedToken string, err error) {
 	currentTime := time.Now().Local()
 	claims := &domain.UserClaims{
 		User: user,
