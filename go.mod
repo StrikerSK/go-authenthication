@@ -8,4 +8,6 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/joho/godotenv v1.3.0
 	github.com/rs/cors v1.7.0
+	github.com/spf13/viper v1.18.2 // indirect
+	golang.org/x/crypto v0.16.0
 )

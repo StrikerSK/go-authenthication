@@ -4,15 +4,20 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	"github.com/strikersk/user-auth/config"
 	"github.com/strikersk/user-auth/src/handlers"
 	"github.com/strikersk/user-auth/src/jwt"
 	userRepository "github.com/strikersk/user-auth/src/repository"
 	userServices "github.com/strikersk/user-auth/src/service"
+	"log"
 	"net/http"
 )
 
 func main() {
-	myRouter := mux.NewRouter()
+	applicationConfiguration := config.ReadConfiguration()
+
+	coreRoute := mux.NewRouter()
+	appRoute := coreRoute.PathPrefix(applicationConfiguration.Application.ContextPath).Subrouter()
 
 	jwtConfig := jwt.NewConfigStruct()
 	userRepo := userRepository.NewLocalUserRepository()
@@ -23,9 +28,13 @@ func main() {
 	jwtHandling := handlers.NewJwtHandler(&userService, jwtConfig)
 	cookiesHandling := handlers.NewCookiesHandler("session_token", &userService)
 
-	userHandling.EnrichRouter(myRouter)
-	jwtHandling.EnrichRouter(myRouter)
-	cookiesHandling.EnrichRouter(myRouter)
+	userHandling.EnrichRouter(appRoute)
+	jwtHandling.EnrichRouter(appRoute)
+	cookiesHandling.EnrichRouter(appRoute)
 
-	fmt.Println(http.ListenAndServe(":5000", cors.AllowAll().Handler(myRouter)))
+	corsHandler := cors.AllowAll().Handler(appRoute)
+	address := fmt.Sprintf(":%s", applicationConfiguration.Application.Port)
+
+	log.Println("Listening on port:", applicationConfiguration.Application.Port)
+	log.Println(http.ListenAndServe(address, corsHandler))
 }
