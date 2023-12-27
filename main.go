@@ -21,7 +21,7 @@ func main() {
 	authorizationService := userServices.NewJWTService(authorizationConfig)
 
 	userRepo := userRepository.NewLocalUserRepository()
-	userCache := userRepository.NewCacheConfig()
+	userCache := userRepository.NewCacheConfig(applicationConfiguration.Cache)
 	userService := userServices.NewUserService(&userRepo, userCache)
 	userHandling := handlers.NewUserHandler(&userService)
 	userHandling.EnrichRouter(appRoute)

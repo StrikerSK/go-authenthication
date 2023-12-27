@@ -23,9 +23,17 @@ type Authorization struct {
 	JWT                 JWTConfiguration `mapstructure:"JWT"`
 }
 
+type CacheConfiguration struct {
+	URL        string `mapstructure:"URL"`
+	Host       string `mapstructure:"Host"`
+	Port       string `mapstructure:"Port"`
+	Expiration int    `mapstructure:"Expiration"`
+}
+
 type ApplicationConfiguration struct {
-	Application   Application   `mapstructure:"Application"`
-	Authorization Authorization `mapstructure:"Authorization"`
+	Application   Application        `mapstructure:"Application"`
+	Authorization Authorization      `mapstructure:"Authorization"`
+	Cache         CacheConfiguration `mapstructure:"Cache"`
 }
 
 // ReadConfiguration - read file from the current directory and marshal into the conf config struct.

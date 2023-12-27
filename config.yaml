@@ -3,8 +3,13 @@ Application:
     ContextPath: /api
 Authorization:
     TokenExpiration: 3600
-    TokenEncoding: Wow, much safe
     AuthorizationHeader: Authorization
+    AuthorizationType: jwt
+    JWT:
+        TokenEncoding: Wow, much safe
     ExcludedPaths:
         - /api/user/register
         - /api/user/login
+Cache:
+    URL: localhost:6379
+    Expiration: 300
