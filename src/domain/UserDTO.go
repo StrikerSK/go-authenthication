@@ -6,8 +6,7 @@ type UserDTO struct {
 	UserCredentials
 }
 
-func (u *UserDTO) MarshalBinary() ([]byte, error) {
-	u.ClearPassword()
+func (u UserDTO) MarshalBinary() ([]byte, error) {
 	return json.Marshal(u)
 }
 

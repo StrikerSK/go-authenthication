@@ -7,6 +7,7 @@ import (
 	"github.com/strikersk/user-auth/config"
 	"github.com/strikersk/user-auth/src/domain"
 	"github.com/strikersk/user-auth/src/ports"
+	"log"
 	"net/http"
 	"time"
 )
@@ -92,6 +93,7 @@ func (h CookiesHandler) Welcome(w http.ResponseWriter, r *http.Request) {
 	// Create a new random session token
 	username, err := h.tokenService.ParseToken(sessionToken)
 	if err != nil {
+		log.Printf("token parsing error: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

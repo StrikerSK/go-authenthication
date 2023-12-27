@@ -12,11 +12,11 @@ func NewBase64EncodingService() Base64EncodingService {
 }
 
 func (s Base64EncodingService) GenerateToken(user domain.UserDTO) (string, error) {
-	return base64.URLEncoding.EncodeToString([]byte(user.Username)), nil
+	return base64.StdEncoding.EncodeToString([]byte(user.Username)), nil
 }
 
 func (s Base64EncodingService) ParseToken(token string) (string, error) {
-	response, err := base64.URLEncoding.DecodeString(token)
+	response, err := base64.StdEncoding.DecodeString(token)
 	if err != nil {
 		return "", err
 	}

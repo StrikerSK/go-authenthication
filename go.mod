@@ -3,11 +3,10 @@ module github.com/strikersk/user-auth
 go 1.16
 
 require (
-	github.com/go-redis/redis/v9 v9.0.0-beta.1
-	github.com/golang-jwt/jwt/v4 v4.4.2
-	github.com/gorilla/mux v1.8.0
-	github.com/joho/godotenv v1.3.0
+	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/gorilla/mux v1.8.1
+	github.com/redis/go-redis/v9 v9.3.1 // indirect
 	github.com/rs/cors v1.7.0
-	github.com/spf13/viper v1.18.2 // indirect
+	github.com/spf13/viper v1.18.2
 	golang.org/x/crypto v0.16.0
 )

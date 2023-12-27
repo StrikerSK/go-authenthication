@@ -3,7 +3,7 @@ package userRepository
 import (
 	"context"
 	"encoding/json"
-	"github.com/go-redis/redis/v9"
+	"github.com/redis/go-redis/v9"
 	"github.com/strikersk/user-auth/src/domain"
 	"log"
 	"time"

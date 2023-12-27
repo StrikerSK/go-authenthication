@@ -18,6 +18,18 @@ func NewLocalUserRepository() LocalUserRepository {
 				Password: "test",
 			},
 		},
+		{
+			UserCredentials: domain.UserCredentials{
+				Username: "admin",
+				Password: "admin",
+			},
+		},
+		{
+			UserCredentials: domain.UserCredentials{
+				Username: "guest",
+				Password: "guest",
+			},
+		},
 	}
 	return localRepository
 }

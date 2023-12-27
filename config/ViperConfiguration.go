@@ -15,11 +15,6 @@ type JWTConfiguration struct {
 	TokenEncoding string `mapstructure:"TokenEncoding"`
 }
 
-type CookiesConfiguration struct {
-	TokenExpiration     int    `mapstructure:"TokenExpiration"`
-	AuthorizationHeader string `mapstructure:"AuthorizationHeader"`
-}
-
 type Authorization struct {
 	AuthorizationType   string           `mapstructure:"AuthorizationType"`
 	AuthorizationHeader string           `mapstructure:"AuthorizationHeader"`
@@ -50,7 +45,12 @@ func ReadConfiguration() *ApplicationConfiguration {
 			ContextPath: "/api",
 		},
 		Authorization: Authorization{
+			AuthorizationType:   "cookies",
 			AuthorizationHeader: "Authorization",
+			TokenExpiration:     3600,
+			JWT: JWTConfiguration{
+				TokenEncoding: "Wow, much safe",
+			},
 		},
 	}
 

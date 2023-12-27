@@ -18,20 +18,21 @@ func main() {
 	authorizationConfig := applicationConfiguration.Authorization
 	appRoute := mux.NewRouter().PathPrefix(applicationConfig.ContextPath).Subrouter()
 
+	authorizationService := userServices.NewJWTService(authorizationConfig)
+
 	userRepo := userRepository.NewLocalUserRepository()
 	userCache := userRepository.NewCacheConfig()
-	userService := userServices.NewLocalUserRepository(&userRepo, userCache)
+	userService := userServices.NewUserService(&userRepo, userCache)
 	userHandling := handlers.NewUserHandler(&userService)
 	userHandling.EnrichRouter(appRoute)
 
 	switch authorizationConfig.AuthorizationType {
 	case "jwt":
-		jwtConfig := userServices.NewConfigStruct()
-		jwtHandling := handlers.NewJwtHandler(&userService, jwtConfig)
+		jwtHandling := handlers.NewJwtHandler(&userService, authorizationService)
 		jwtHandling.EnrichRouter(appRoute)
 		break
 	case "cookies":
-		cookiesHandling := handlers.NewCookiesHandler("session_token", &userService)
+		cookiesHandling := handlers.NewCookiesHandler(&userService, authorizationService, authorizationConfig)
 		cookiesHandling.EnrichRouter(appRoute)
 		break
 	default:
