@@ -6,6 +6,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/strikersk/user-auth/config"
 	"github.com/strikersk/user-auth/src/handlers"
+	"github.com/strikersk/user-auth/src/ports"
 	userRepository "github.com/strikersk/user-auth/src/repository"
 	userServices "github.com/strikersk/user-auth/src/service"
 	"log"
@@ -18,7 +19,19 @@ func main() {
 	authorizationConfig := applicationConfiguration.Authorization
 	appRoute := mux.NewRouter().PathPrefix(applicationConfig.ContextPath).Subrouter()
 
-	authorizationService := userServices.NewJWTService(authorizationConfig)
+	var authorizationService ports.IAuthorizationService
+	switch authorizationConfig.TokenEncodingType {
+	case "jwt":
+		log.Println("JWT Token encoding selected")
+		authorizationService = userServices.NewJWTService(authorizationConfig)
+		break
+	case "base64":
+		log.Println("Base64 Token encoding selected")
+		authorizationService = userServices.NewBase64EncodingService()
+		break
+	default:
+		log.Println("no token encoding type selected")
+	}
 
 	userRepo := userRepository.NewLocalUserRepository()
 	userCache := userRepository.NewCacheConfig(applicationConfiguration.Cache)
@@ -28,10 +41,12 @@ func main() {
 
 	switch authorizationConfig.AuthorizationType {
 	case "jwt":
+		log.Println("JWT endpoint handling  selected")
 		jwtHandling := handlers.NewJwtHandler(&userService, authorizationService)
 		jwtHandling.EnrichRouter(appRoute)
 		break
 	case "cookies":
+		log.Println("Cookies endpoint handling  selected")
 		cookiesHandling := handlers.NewCookiesHandler(&userService, authorizationService, authorizationConfig)
 		cookiesHandling.EnrichRouter(appRoute)
 		break

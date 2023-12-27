@@ -5,6 +5,7 @@ Authorization:
     TokenExpiration: 3600
     AuthorizationHeader: Authorization
     AuthorizationType: jwt
+    TokenEncodingType: jwt
     JWT:
         TokenEncoding: Wow, much safe
     ExcludedPaths:

@@ -19,6 +19,7 @@ type Authorization struct {
 	AuthorizationType   string           `mapstructure:"AuthorizationType"`
 	AuthorizationHeader string           `mapstructure:"AuthorizationHeader"`
 	TokenExpiration     int              `mapstructure:"TokenExpiration"`
+	TokenEncodingType   string           `mapstructure:"TokenEncodingType"`
 	ExcludedPaths       []string         `mapstructure:"ExcludedPaths"`
 	JWT                 JWTConfiguration `mapstructure:"JWT"`
 }
