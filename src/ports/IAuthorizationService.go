@@ -1,10 +1,11 @@
 package ports
 
 import (
+	"context"
 	"github.com/strikersk/user-auth/src/domain"
 )
 
 type IAuthorizationService interface {
-	ParseToken(signedToken string) (string, error)
-	GenerateToken(user domain.UserDTO) (signedToken string, err error)
+	ParseToken(context.Context, string) (string, error)
+	GenerateToken(context.Context, domain.UserDTO) (string, error)
 }
