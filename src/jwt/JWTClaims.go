@@ -6,6 +6,6 @@ import (
 )
 
 type UserClaims struct {
-	User domain.User
+	User domain.UserDTO
 	jwt.StandardClaims
 }

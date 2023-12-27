@@ -6,21 +6,23 @@ import (
 )
 
 type LocalUserRepository struct {
-	Users []domain.User
+	Users []domain.UserDTO
 }
 
 func NewLocalUserRepository() LocalUserRepository {
 	var localRepository LocalUserRepository
-	localRepository.Users = []domain.User{
+	localRepository.Users = []domain.UserDTO{
 		{
-			Username: "test",
-			Password: "test",
+			UserCredentials: domain.UserCredentials{
+				Username: "test",
+				Password: "test",
+			},
 		},
 	}
 	return localRepository
 }
 
-func (r *LocalUserRepository) CreateUser(user domain.User) error {
+func (r *LocalUserRepository) CreateUser(user domain.UserDTO) error {
 	for _, tmpUser := range r.Users {
 		if user.Username == tmpUser.Username {
 			return errors.New("user already created")
@@ -31,12 +33,12 @@ func (r *LocalUserRepository) CreateUser(user domain.User) error {
 	return nil
 }
 
-func (r *LocalUserRepository) ReadUser(username string) (domain.User, error) {
+func (r *LocalUserRepository) ReadUser(username string) (domain.UserDTO, error) {
 	for _, user := range r.Users {
 		if username == user.Username {
 			return user, nil
 		}
 	}
 
-	return domain.User{}, errors.New("user cannot be found")
+	return domain.UserDTO{}, errors.New("user cannot be found")
 }

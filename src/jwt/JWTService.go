@@ -57,7 +57,7 @@ func (receiver JWTConfiguration) ParseToken(signedToken string) (claims *UserCla
 	return
 }
 
-func (receiver JWTConfiguration) GenerateToken(user domain.User) (signedToken string, err error) {
+func (receiver JWTConfiguration) GenerateToken(user domain.UserDTO) (signedToken string, err error) {
 	claims := &UserClaims{
 		User: user,
 		StandardClaims: jwt.StandardClaims{

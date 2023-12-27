@@ -22,7 +22,7 @@ func (h UserHandler) EnrichRouter(router *mux.Router) {
 }
 
 func (h UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
-	var user domain.User
+	var user domain.UserDTO
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		w.Header()
 		return

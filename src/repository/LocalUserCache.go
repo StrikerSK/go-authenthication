@@ -27,7 +27,7 @@ func NewCacheConfig() (connection UserCache) {
 	return
 }
 
-func (receiver UserCache) CreateCache(ctx context.Context, inputUser domain.User) error {
+func (receiver UserCache) CreateCache(ctx context.Context, inputUser domain.UserDTO) error {
 	err := receiver.Cache.Set(ctx, inputUser.Username, inputUser, time.Second*300).Err()
 	if err != nil {
 		panic(err)
@@ -36,13 +36,13 @@ func (receiver UserCache) CreateCache(ctx context.Context, inputUser domain.User
 	return nil
 }
 
-func (receiver UserCache) RetrieveCache(ctx context.Context, userName string) (domain.User, bool) {
-	var user domain.User
+func (receiver UserCache) RetrieveCache(ctx context.Context, userName string) (domain.UserDTO, bool) {
+	var user domain.UserDTO
 
 	val, err := receiver.Cache.Get(ctx, userName).Result()
 	if err == redis.Nil {
 		log.Println("user not found in cache")
-		return domain.User{}, false
+		return domain.UserDTO{}, false
 	}
 
 	_ = json.Unmarshal([]byte(val), &user)
