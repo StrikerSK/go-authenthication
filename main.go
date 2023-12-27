@@ -6,7 +6,6 @@ import (
 	"github.com/rs/cors"
 	"github.com/strikersk/user-auth/config"
 	"github.com/strikersk/user-auth/src/handlers"
-	"github.com/strikersk/user-auth/src/jwt"
 	userRepository "github.com/strikersk/user-auth/src/repository"
 	userServices "github.com/strikersk/user-auth/src/service"
 	"log"
@@ -27,7 +26,7 @@ func main() {
 
 	switch authorizationConfig.AuthorizationType {
 	case "jwt":
-		jwtConfig := jwt.NewConfigStruct()
+		jwtConfig := userServices.NewConfigStruct()
 		jwtHandling := handlers.NewJwtHandler(&userService, jwtConfig)
 		jwtHandling.EnrichRouter(appRoute)
 		break
