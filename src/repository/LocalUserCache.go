@@ -49,16 +49,25 @@ func (receiver UserCache) CreateCache(ctx context.Context, inputUser domain.User
 	return nil
 }
 
-func (receiver UserCache) RetrieveCache(ctx context.Context, username string) (domain.UserDTO, bool) {
+func (receiver UserCache) RetrieveCache(ctx context.Context, username string) (domain.UserDTO, bool, error) {
 	var user domain.UserDTO
 
 	val, err := receiver.redisClient.Get(ctx, username).Result()
-	if err == redis.Nil {
-		log.Println("user not found in cache")
-		return domain.UserDTO{}, false
+
+	if err != nil {
+		if err == redis.Nil {
+			log.Println("user not found in cache")
+			return domain.UserDTO{}, false, nil
+		} else {
+			return domain.UserDTO{}, false, err
+		}
 	}
 
-	_ = json.Unmarshal([]byte(val), &user)
+	err = json.Unmarshal([]byte(val), &user)
+	if err != nil {
+		return domain.UserDTO{}, false, err
+	}
+
 	//log.Println("Cache user", user)
-	return user, true
+	return user, true, nil
 }

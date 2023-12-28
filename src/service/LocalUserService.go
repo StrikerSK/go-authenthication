@@ -2,6 +2,7 @@ package userServices
 
 import (
 	"context"
+	"errors"
 	"github.com/strikersk/user-auth/src/domain"
 	"github.com/strikersk/user-auth/src/ports"
 )
@@ -22,9 +23,17 @@ func (r *LocalUserService) CreateUser(ctx context.Context, user domain.UserDTO) 
 	return r.userRepository.CreateUser(user)
 }
 
-func (r *LocalUserService) ReadUser(ctx context.Context, username string) (domain.UserDTO, error) {
-	if cachedUser, isPresent := r.userCache.RetrieveCache(ctx, username); !isPresent {
-		user, err := r.userRepository.ReadUser(username)
+func (r *LocalUserService) ReadUser(ctx context.Context, credentials domain.UserCredentials) (domain.UserDTO, error) {
+	var user domain.UserDTO
+	username := credentials.Username
+
+	user, isPresent, err := r.userCache.RetrieveCache(ctx, username)
+	if err != nil {
+		return domain.UserDTO{}, err
+	}
+
+	if !isPresent {
+		user, err = r.userRepository.ReadUser(username)
 		if err != nil {
 			return domain.UserDTO{}, err
 		}
@@ -32,10 +41,11 @@ func (r *LocalUserService) ReadUser(ctx context.Context, username string) (domai
 		if err = r.userCache.CreateCache(ctx, user); err != nil {
 			return domain.UserDTO{}, err
 		}
-		//log.Println("persistedUser", user)
-		return user, nil
-	} else {
-		//log.Println("cachedUser", cachedUser)
-		return cachedUser, nil
 	}
+
+	if user.Password != credentials.Password {
+		return domain.UserDTO{}, errors.New("passwords are not matching")
+	}
+
+	return user, nil
 }

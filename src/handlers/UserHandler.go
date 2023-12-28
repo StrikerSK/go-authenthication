@@ -17,8 +17,8 @@ func NewUserHandler(service ports.IUserService) UserHandler {
 }
 
 func (h UserHandler) EnrichRouter(router *mux.Router) {
-	jwtRouter := router.PathPrefix("/user").Subrouter()
-	jwtRouter.HandleFunc("/register", h.createUser).Methods("POST")
+	userRouter := router.PathPrefix("/user").Subrouter()
+	userRouter.HandleFunc("/register", h.createUser).Methods("POST")
 }
 
 func (h UserHandler) createUser(w http.ResponseWriter, r *http.Request) {

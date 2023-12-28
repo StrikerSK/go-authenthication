@@ -10,28 +10,7 @@ type LocalUserRepository struct {
 }
 
 func NewLocalUserRepository() LocalUserRepository {
-	var localRepository LocalUserRepository
-	localRepository.Users = []domain.UserDTO{
-		{
-			UserCredentials: domain.UserCredentials{
-				Username: "test",
-				Password: "test",
-			},
-		},
-		{
-			UserCredentials: domain.UserCredentials{
-				Username: "admin",
-				Password: "admin",
-			},
-		},
-		{
-			UserCredentials: domain.UserCredentials{
-				Username: "guest",
-				Password: "guest",
-			},
-		},
-	}
-	return localRepository
+	return LocalUserRepository{}
 }
 
 func (r *LocalUserRepository) CreateUser(user domain.UserDTO) error {

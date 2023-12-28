@@ -7,5 +7,5 @@ import (
 
 type IUserService interface {
 	CreateUser(context.Context, domain.UserDTO) error
-	ReadUser(context.Context, string) (domain.UserDTO, error)
+	ReadUser(context.Context, domain.UserCredentials) (domain.UserDTO, error)
 }

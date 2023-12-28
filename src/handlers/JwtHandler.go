@@ -23,15 +23,16 @@ func NewJwtHandler(userService ports.IUserService, authService ports.IAuthorizat
 }
 
 func (h JwtHandler) EnrichRouter(router *mux.Router) {
-	jwtRouter := router.PathPrefix("/user").Subrouter()
-	jwtRouter.HandleFunc("/login", h.Login).Methods(http.MethodPost)
-	jwtRouter.HandleFunc("/welcome", h.Welcome).Methods(http.MethodGet)
+	userRouter := router.PathPrefix("/user").Subrouter()
+	userRouter.HandleFunc("/login", h.Login).Methods(http.MethodPost)
+	userRouter.HandleFunc("/welcome", h.Welcome).Methods(http.MethodGet)
 }
 
 func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var reqUser domain.UserCredentials
+	var userCredentials domain.UserCredentials
+
 	// Get the JSON body and decode into credentials
-	err := json.NewDecoder(r.Body).Decode(&reqUser)
+	err := json.NewDecoder(r.Body).Decode(&userCredentials)
 	if err != nil {
 		// If the structure of the body is wrong, return an HTTP error
 		w.WriteHeader(http.StatusBadRequest)
@@ -39,7 +40,7 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	persistedUser, err := h.userService.ReadUser(r.Context(), reqUser.Username)
+	persistedUser, err := h.userService.ReadUser(r.Context(), userCredentials)
 	if err != nil {
 		// If the structure of the body is wrong, return an HTTP error
 		w.WriteHeader(http.StatusBadRequest)
@@ -48,9 +49,9 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// If a password exists for the given user
-	// AND, if it is the same as the password we received, the we can move ahead
+	// AND, if it is the same as the password we received, then we can move ahead
 	// if NOT, then we return an "Unauthorized" status
-	if reqUser.Password != persistedUser.Password {
+	if userCredentials.Password != persistedUser.Password {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -62,6 +63,14 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Authorization", userToken)
+	w.Header().Set("Content-Type", "application/json")
+	user, err := json.Marshal(persistedUser)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	w.Write(user)
 }
 
 func (h JwtHandler) Welcome(w http.ResponseWriter, r *http.Request) {
