@@ -16,7 +16,7 @@ func NewUserHandler(service ports.IUserService) UserHandler {
 	return UserHandler{service: service}
 }
 
-func (h UserHandler) EnrichRouter(router *mux.Router) {
+func (h UserHandler) RegisterHandler(router *mux.Router) {
 	userRouter := router.PathPrefix("/user").Subrouter()
 	userRouter.HandleFunc("/register", h.createUser).Methods("POST")
 }

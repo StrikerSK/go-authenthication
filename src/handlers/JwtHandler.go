@@ -22,7 +22,7 @@ func NewJwtHandler(userService ports.IUserService, authService ports.IAuthorizat
 	}
 }
 
-func (h JwtHandler) EnrichRouter(router *mux.Router) {
+func (h JwtHandler) RegisterHandler(router *mux.Router) {
 	userRouter := router.PathPrefix("/user").Subrouter()
 	userRouter.HandleFunc("/login", h.Login).Methods(http.MethodPost)
 	userRouter.HandleFunc("/welcome", h.Welcome).Methods(http.MethodGet)

@@ -17,38 +17,28 @@ func main() {
 	applicationConfiguration := config.ReadConfiguration()
 	applicationConfig := applicationConfiguration.Application
 	authorizationConfig := applicationConfiguration.Authorization
+
 	appRoute := mux.NewRouter().PathPrefix(applicationConfig.ContextPath).Subrouter()
 
-	var authorizationService ports.IAuthorizationService
-	switch authorizationConfig.TokenEncodingType {
-	case "jwt":
-		log.Println("JWT Token encoding selected")
-		authorizationService = userServices.NewJWTService(authorizationConfig)
-		break
-	case "base64":
-		log.Println("Base64 Token encoding selected")
-		authorizationService = userServices.NewBase64EncodingService()
-		break
-	default:
-		log.Println("no token encoding type selected")
-	}
+	authorizationService := resolveEncodingType(authorizationConfig)
 
 	userRepo := userRepository.NewLocalUserRepository()
 	userCache := userRepository.NewCacheConfig(applicationConfiguration.Cache)
 	userService := userServices.NewUserService(&userRepo, userCache)
 	userHandling := handlers.NewUserHandler(&userService)
-	userHandling.EnrichRouter(appRoute)
+
+	userHandling.RegisterHandler(appRoute)
 
 	switch authorizationConfig.AuthorizationType {
 	case "jwt":
 		log.Println("JWT endpoint handling  selected")
 		jwtHandling := handlers.NewJwtHandler(&userService, authorizationService)
-		jwtHandling.EnrichRouter(appRoute)
+		jwtHandling.RegisterHandler(appRoute)
 		break
 	case "cookies":
 		log.Println("Cookies endpoint handling  selected")
 		cookiesHandling := handlers.NewCookiesHandler(&userService, authorizationService, authorizationConfig)
-		cookiesHandling.EnrichRouter(appRoute)
+		cookiesHandling.RegisterHandler(appRoute)
 		break
 	default:
 		log.Fatal("unrecognized authorization type")
@@ -59,4 +49,18 @@ func main() {
 
 	log.Println("Listening on port:", applicationConfig.Port)
 	log.Println(http.ListenAndServe(address, corsHandler))
+}
+
+func resolveEncodingType(configuration config.Authorization) ports.IAuthorizationService {
+	switch configuration.TokenEncodingType {
+	case "jwt":
+		log.Println("JWT Token encoding selected")
+		return userServices.NewJWTService(configuration)
+	case "base64":
+		log.Println("Base64 Token encoding selected")
+		return userServices.NewBase64EncodingService()
+	default:
+		log.Fatal("no token encoding type selected")
+		return nil
+	}
 }

@@ -28,7 +28,7 @@ func NewCookiesHandler(userService ports.IUserService, tokenService ports.IAutho
 	}
 }
 
-func (h CookiesHandler) EnrichRouter(router *mux.Router) {
+func (h CookiesHandler) RegisterHandler(router *mux.Router) {
 	userRouter := router.PathPrefix("/user").Subrouter()
 	userRouter.HandleFunc("/login", h.Login).Methods(http.MethodPost)
 	userRouter.HandleFunc("/welcome", h.Welcome).Methods(http.MethodGet)
@@ -71,6 +71,15 @@ func (h CookiesHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Value:   sessionToken,
 		Expires: time.Now().Add(h.expiration * time.Second),
 	})
+
+	w.Header().Set("Content-Type", "application/json")
+	user, err := json.Marshal(persistedUser)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	w.Write(user)
 }
 
 func (h CookiesHandler) Welcome(w http.ResponseWriter, r *http.Request) {
