@@ -11,12 +11,14 @@ import (
 	"time"
 )
 
-type UserCache struct {
+type RedisCache struct {
 	redisClient *redis.Client
 	expiration  time.Duration
 }
 
-func NewCacheConfig(configuration config.CacheConfiguration) (connection UserCache) {
+const cachePrefix = "user:"
+
+func NewRedisCache(configuration config.CacheConfiguration) (connection RedisCache) {
 	var address string
 
 	if configuration.URL != "" {
@@ -34,14 +36,14 @@ func NewCacheConfig(configuration config.CacheConfiguration) (connection UserCac
 	})
 
 	// Assign the connection to the package level `cache` variable
-	return UserCache{
+	return RedisCache{
 		redisClient: redisConnection,
 		expiration:  time.Duration(configuration.Expiration),
 	}
 }
 
-func (receiver UserCache) CreateCache(ctx context.Context, inputUser domain.UserDTO) error {
-	err := receiver.redisClient.Set(ctx, inputUser.Username, inputUser, time.Second*receiver.expiration).Err()
+func (receiver RedisCache) CreateCache(ctx context.Context, inputUser domain.UserDTO) error {
+	err := receiver.redisClient.Set(ctx, cachePrefix+inputUser.Username, inputUser, time.Second*receiver.expiration).Err()
 	if err != nil {
 		return err
 	}
@@ -49,10 +51,10 @@ func (receiver UserCache) CreateCache(ctx context.Context, inputUser domain.User
 	return nil
 }
 
-func (receiver UserCache) RetrieveCache(ctx context.Context, username string) (domain.UserDTO, bool, error) {
+func (receiver RedisCache) RetrieveCache(ctx context.Context, username string) (domain.UserDTO, bool, error) {
 	var user domain.UserDTO
 
-	val, err := receiver.redisClient.Get(ctx, username).Result()
+	val, err := receiver.redisClient.Get(ctx, cachePrefix+username).Result()
 
 	if err != nil {
 		if err == redis.Nil {

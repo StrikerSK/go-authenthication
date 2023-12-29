@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
-	"github.com/strikersk/user-auth/config"
-	"github.com/strikersk/user-auth/src/handlers"
-	"github.com/strikersk/user-auth/src/ports"
+	appConfigs "github.com/strikersk/user-auth/config"
+	userhandlers "github.com/strikersk/user-auth/src/handlers"
+	userPorts "github.com/strikersk/user-auth/src/ports"
 	userRepository "github.com/strikersk/user-auth/src/repository"
 	userServices "github.com/strikersk/user-auth/src/service"
 	"log"
@@ -14,34 +14,41 @@ import (
 )
 
 func main() {
-	applicationConfiguration := config.ReadConfiguration()
+	applicationConfiguration := appConfigs.ReadConfiguration()
 	applicationConfig := applicationConfiguration.Application
 	authorizationConfig := applicationConfiguration.Authorization
+	cacheConfiguration := applicationConfiguration.Cache
 
 	appRoute := mux.NewRouter().PathPrefix(applicationConfig.ContextPath).Subrouter()
 
 	authorizationService := resolveEncodingType(authorizationConfig)
 
 	userRepo := userRepository.NewLocalUserRepository()
-	userCache := userRepository.NewCacheConfig(applicationConfiguration.Cache)
+	userCache := userRepository.NewRedisCache(cacheConfiguration)
 	userService := userServices.NewUserService(&userRepo, userCache)
-	userHandling := handlers.NewUserHandler(&userService)
+	userHandling := userhandlers.NewUserHandler(&userService)
 
-	userHandling.RegisterHandler(appRoute)
+	handlers := []userPorts.IUserHandler{
+		userHandling,
+	}
 
 	switch authorizationConfig.AuthorizationType {
 	case "jwt":
 		log.Println("JWT endpoint handling  selected")
-		jwtHandling := handlers.NewJwtHandler(&userService, authorizationService)
-		jwtHandling.RegisterHandler(appRoute)
+		jwtHandling := userhandlers.NewJwtHandler(&userService, authorizationService)
+		handlers = append(handlers, jwtHandling)
 		break
 	case "cookies":
 		log.Println("Cookies endpoint handling  selected")
-		cookiesHandling := handlers.NewCookiesHandler(&userService, authorizationService, authorizationConfig)
-		cookiesHandling.RegisterHandler(appRoute)
+		cookiesHandling := userhandlers.NewCookiesHandler(&userService, authorizationService, authorizationConfig)
+		handlers = append(handlers, cookiesHandling)
 		break
 	default:
 		log.Fatal("unrecognized authorization type")
+	}
+
+	for _, handler := range handlers {
+		handler.RegisterHandler(appRoute)
 	}
 
 	corsHandler := cors.AllowAll().Handler(appRoute)
@@ -51,7 +58,7 @@ func main() {
 	log.Println(http.ListenAndServe(address, corsHandler))
 }
 
-func resolveEncodingType(configuration config.Authorization) ports.IAuthorizationService {
+func resolveEncodingType(configuration appConfigs.Authorization) userPorts.IAuthorizationService {
 	switch configuration.TokenEncodingType {
 	case "jwt":
 		log.Println("JWT Token encoding selected")
