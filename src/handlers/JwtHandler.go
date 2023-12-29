@@ -82,12 +82,6 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 func (h JwtHandler) Welcome(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get(h.tokenName)
-	if token == "" {
-		log.Println("Cannot get token from header")
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
 	username, err := h.authService.ParseToken(token)
 	if err != nil {
 		log.Println("Token parsing error:", err)
