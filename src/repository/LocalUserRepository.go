@@ -13,7 +13,7 @@ func NewLocalUserRepository() LocalUserRepository {
 	return LocalUserRepository{}
 }
 
-func (r *LocalUserRepository) CreateUser(user domain.UserDTO) error {
+func (r *LocalUserRepository) CreateEntry(user domain.UserDTO) error {
 	for _, tmpUser := range r.Users {
 		if user.Username == tmpUser.Username {
 			return errors.New("user already created")
@@ -24,12 +24,12 @@ func (r *LocalUserRepository) CreateUser(user domain.UserDTO) error {
 	return nil
 }
 
-func (r *LocalUserRepository) ReadUser(username string) (domain.UserDTO, error) {
+func (r *LocalUserRepository) ReadEntry(username string) (domain.UserDTO, bool, error) {
 	for _, user := range r.Users {
 		if username == user.Username {
-			return user, nil
+			return user, true, nil
 		}
 	}
 
-	return domain.UserDTO{}, errors.New("user cannot be found")
+	return domain.UserDTO{}, false, nil
 }

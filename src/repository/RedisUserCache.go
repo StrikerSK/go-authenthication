@@ -30,10 +30,16 @@ func NewRedisCache(configuration config.CacheConfiguration) (connection RedisCac
 	}
 
 	redisConnection := redis.NewClient(&redis.Options{
-		Addr:     address,
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Addr: address,
 	})
+
+	if err := redisConnection.Ping(context.Background()).Err(); err != nil {
+		log.Fatalf("Error during connecting Redis: %v\n", err)
+	}
+
+	if err := redisConnection.FlushDB(context.Background()).Err(); err != nil {
+		log.Fatalf("Error during cleaning caches: %v\n", err)
+	}
 
 	// Assign the connection to the package level `cache` variable
 	return RedisCache{

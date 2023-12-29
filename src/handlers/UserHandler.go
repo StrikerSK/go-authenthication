@@ -3,8 +3,10 @@ package handlers
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"github.com/strikersk/user-auth/constants"
 	"github.com/strikersk/user-auth/src/domain"
 	"github.com/strikersk/user-auth/src/ports"
+	"log"
 	"net/http"
 )
 
@@ -28,7 +30,17 @@ func (h UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = h.service.CreateUser(r.Context(), user)
+	if err := h.service.CreateUser(r.Context(), user); err != nil {
+		log.Printf("user register error: %s\n", err)
+
+		if err.Error() == constants.ConflictConstant {
+			w.WriteHeader(http.StatusConflict)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+
+		return
+	}
 
 	w.WriteHeader(http.StatusCreated)
 	return

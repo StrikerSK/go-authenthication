@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"github.com/spf13/viper"
+	"log"
 	"os"
 )
 
@@ -65,8 +66,7 @@ func ReadConfiguration() *ApplicationConfiguration {
 
 	err = viper.Unmarshal(configuration)
 	if err != nil {
-		fmt.Printf("unable to decode into config struct, %v", err)
-		os.Exit(-1)
+		log.Fatal("Unable to decode into configuration:", err)
 	}
 
 	return configuration
