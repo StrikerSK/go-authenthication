@@ -68,7 +68,11 @@ func (receiver MemcacheCache) RetrieveCache(ctx context.Context, username string
 
 	item, err := receiver.cacheClient.Get(username)
 	if err != nil {
-		return domain.UserDTO{}, false, err
+		if err.Error() == memcache.ErrCacheMiss.Error() {
+			return domain.UserDTO{}, false, nil
+		} else {
+			return domain.UserDTO{}, false, err
+		}
 	}
 
 	err = user.UnmarshalBinary(item.Value)

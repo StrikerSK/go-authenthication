@@ -70,3 +70,21 @@ func resolveUserEndpointAuthorization(authorizationConfig appConfigs.Authorizati
 		return nil
 	}
 }
+
+func resolveCachingInstance(configuration appConfigs.CacheConfiguration) userPorts.IUserCache {
+	switch configuration.Name {
+	case "memcache":
+		log.Println("Memcache instance selected")
+		return userRepository.NewMemcacheCache(configuration)
+	case "redis":
+		log.Println("Redis instance selected")
+		return userRepository.NewRedisCache(configuration)
+	default:
+		log.Fatal("No cache instance selected")
+		return nil
+	}
+}
+
+func resolveDatabaseInstance() userPorts.IUserRepository {
+	return userRepository.NewLocalUserRepository()
+}
