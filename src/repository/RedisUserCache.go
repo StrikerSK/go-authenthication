@@ -64,7 +64,6 @@ func (receiver RedisCache) RetrieveCache(ctx context.Context, username string) (
 
 	if err != nil {
 		if err == redis.Nil {
-			log.Println("user not found in cache")
 			return domain.UserDTO{}, false, nil
 		} else {
 			return domain.UserDTO{}, false, err

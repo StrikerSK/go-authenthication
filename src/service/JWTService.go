@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/strikersk/user-auth/config"
+	"github.com/strikersk/user-auth/constants"
 	"github.com/strikersk/user-auth/src/domain"
 	"time"
 )
@@ -40,7 +41,7 @@ func (receiver JWTService) ParseToken(signedToken string) (string, error) {
 	}
 
 	if claims.ExpiresAt.Before(time.Now().Local()) {
-		err = errors.New("JWT is expired")
+		err = errors.New(constants.ExpiredTokenConstant)
 		return "", err
 	}
 

@@ -22,7 +22,7 @@ func NewUserService(userRepository ports.IUserRepository, userCache ports.IUserC
 
 func (r *LocalUserService) CreateUser(ctx context.Context, user domain.UserDTO) error {
 	persistedUser, exists, err := r.fetchUser(ctx, user.UserCredentials)
-	if err != nil {
+	if err != nil && err.Error() != constants.NotFoundConstant {
 		return err
 	}
 

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/strikersk/user-auth/config"
+	"github.com/strikersk/user-auth/constants"
 	"github.com/strikersk/user-auth/src/domain"
 	"github.com/strikersk/user-auth/src/ports"
-	"log"
 	"net/http"
 	"time"
 )
@@ -102,9 +102,12 @@ func (h CookiesHandler) Welcome(w http.ResponseWriter, r *http.Request) {
 	// Create a new random session token
 	username, err := h.tokenService.ParseToken(sessionToken)
 	if err != nil {
-		log.Printf("token parsing error: %v", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		switch err.Error() {
+		case constants.ExpiredTokenConstant:
+			w.WriteHeader(http.StatusUnauthorized)
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 
 	// Finally, return the welcome message to the user

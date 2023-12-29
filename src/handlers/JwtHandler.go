@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/strikersk/user-auth/constants"
 	"github.com/strikersk/user-auth/src/domain"
 	"github.com/strikersk/user-auth/src/ports"
 	"log"
@@ -35,16 +36,16 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&userCredentials)
 	if err != nil {
 		// If the structure of the body is wrong, return an HTTP error
-		w.WriteHeader(http.StatusBadRequest)
-		log.Printf("Login() error: %s\n", err)
+		log.Printf("Body decoding error: %s\n", err)
+		constants.ResolveResponse(w, err)
 		return
 	}
 
 	persistedUser, err := h.userService.ReadUser(r.Context(), userCredentials)
 	if err != nil {
 		// If the structure of the body is wrong, return an HTTP error
-		w.WriteHeader(http.StatusBadRequest)
-		log.Printf("Login() error: %s\n", err)
+		log.Printf("User read error: %s\n", err)
+		constants.ResolveResponse(w, err)
 		return
 	}
 
@@ -77,9 +78,8 @@ func (h JwtHandler) Welcome(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Authorization")
 	username, err := h.authService.ParseToken(token)
 	if err != nil {
-		// If the structure of the body is wrong, return an HTTP error
-		w.WriteHeader(http.StatusBadRequest)
 		log.Printf("Welcome() error: %s\n", err)
+		constants.ResolveResponse(w, err)
 		return
 	}
 
