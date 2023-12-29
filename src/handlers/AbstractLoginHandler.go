@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/strikersk/user-auth/config"
@@ -83,20 +84,13 @@ func (h AbstractHandler) writeHeader(token string, w http.ResponseWriter) {
 }
 
 func (h AbstractHandler) Welcome(w http.ResponseWriter, r *http.Request) {
-	// We can obtain the session token from the requests cookies, which come with every request
-	c, err := r.Cookie(h.tokenName)
+	token, err := h.readAuthorizationHeader(r)
 	if err != nil {
-		if err == http.ErrNoCookie {
-			// If the cookie is not set, return an unauthorized status
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		// For any other type of error, return a bad request status
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	sessionToken := c.Value
+	sessionToken := token
 
 	// We then get the name of the user from our cache, where we set the session token
 	// Create a new random session token
@@ -112,4 +106,8 @@ func (h AbstractHandler) Welcome(w http.ResponseWriter, r *http.Request) {
 
 	// Finally, return the welcome message to the user
 	_, _ = w.Write([]byte(fmt.Sprintf("Welcome %s!", username)))
+}
+
+func (h AbstractHandler) readAuthorizationHeader(r *http.Request) (string, error) {
+	return "", errors.New("not implemented")
 }

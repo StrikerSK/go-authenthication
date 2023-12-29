@@ -27,3 +27,12 @@ func (h CookiesHandler) writeHeader(token string, w http.ResponseWriter) {
 		Expires: time.Now().Add(h.expiration * time.Second),
 	})
 }
+
+func (h CookiesHandler) readAuthorizationHeader(r *http.Request) (string, error) {
+	c, err := r.Cookie(h.tokenName)
+	if err != nil {
+		return "", err
+	}
+
+	return c.Value, nil
+}
