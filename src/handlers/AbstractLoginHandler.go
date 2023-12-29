@@ -79,7 +79,7 @@ func (h AbstractHandler) Login(w http.ResponseWriter, r *http.Request) {
 	w.Write(user)
 }
 
-func (h AbstractHandler) writeHeader(token string, w http.ResponseWriter) {
+func (h *AbstractHandler) writeHeader(token string, w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -108,6 +108,6 @@ func (h AbstractHandler) Welcome(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(fmt.Sprintf("Welcome %s!", username)))
 }
 
-func (h AbstractHandler) readAuthorizationHeader(r *http.Request) (string, error) {
+func (h *AbstractHandler) readAuthorizationHeader(r *http.Request) (string, error) {
 	return "", errors.New("not implemented")
 }

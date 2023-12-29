@@ -4,7 +4,7 @@ Application:
 Authorization:
     TokenExpiration: 3600
     AuthorizationHeader: Authorization
-    AuthorizationType: jwt
+    AuthorizationType: cookies
     TokenEncodingType: jwt
     JWT:
         TokenEncoding: Wow, much safe
