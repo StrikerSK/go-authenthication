@@ -2,28 +2,22 @@ package userRepository
 
 import (
 	"errors"
+	"github.com/strikersk/user-auth/constants"
 	"github.com/strikersk/user-auth/src/domain"
 )
 
 type LocalUserRepository struct {
-	Users []domain.User
+	Users []domain.UserDTO
 }
 
 func NewLocalUserRepository() LocalUserRepository {
-	var localRepository LocalUserRepository
-	localRepository.Users = []domain.User{
-		{
-			Username: "test",
-			Password: "test",
-		},
-	}
-	return localRepository
+	return LocalUserRepository{}
 }
 
-func (r *LocalUserRepository) CreateUser(user domain.User) error {
+func (r *LocalUserRepository) CreateEntry(user domain.UserDTO) error {
 	for _, tmpUser := range r.Users {
 		if user.Username == tmpUser.Username {
-			return errors.New("user already created")
+			return errors.New(constants.ConflictConstant)
 		}
 	}
 
@@ -31,12 +25,12 @@ func (r *LocalUserRepository) CreateUser(user domain.User) error {
 	return nil
 }
 
-func (r *LocalUserRepository) ReadUser(username string) (domain.User, error) {
+func (r *LocalUserRepository) ReadEntry(username string) (domain.UserDTO, bool, error) {
 	for _, user := range r.Users {
 		if username == user.Username {
-			return user, nil
+			return user, true, nil
 		}
 	}
 
-	return domain.User{}, errors.New("user cannot be found")
+	return domain.UserDTO{}, false, errors.New(constants.NotFoundConstant)
 }

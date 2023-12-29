@@ -1,13 +1,13 @@
 version: '3.5'
 
 services:
-  db:
+  database:
     image: postgres
     ports:
       - 5432:5432
     environment:
       POSTGRES_PASSWORD: Password
-  redis:
+  cache:
     image: redis
     ports:
       - 6379:6379

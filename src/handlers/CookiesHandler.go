@@ -1,32 +1,38 @@
 package handlers
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/strikersk/user-auth/config"
+	"github.com/strikersk/user-auth/constants"
 	"github.com/strikersk/user-auth/src/domain"
 	"github.com/strikersk/user-auth/src/ports"
+	"log"
 	"net/http"
 	"time"
 )
 
 type CookiesHandler struct {
-	TokenName string
-	Service   ports.IUserService
+	tokenName    string
+	expiration   time.Duration
+	userService  ports.IUserService
+	tokenService ports.IAuthorizationService
 }
 
-func NewCookiesHandler(tokenName string, service ports.IUserService) CookiesHandler {
+func NewCookiesHandler(userService ports.IUserService, tokenService ports.IAuthorizationService, configuration config.Authorization) CookiesHandler {
 	return CookiesHandler{
-		TokenName: tokenName,
-		Service:   service,
+		tokenName:    configuration.AuthorizationHeader,
+		expiration:   time.Duration(configuration.TokenExpiration),
+		userService:  userService,
+		tokenService: tokenService,
 	}
 }
 
-func (h CookiesHandler) EnrichRouter(router *mux.Router) {
-	jwtRouter := router.PathPrefix("/cookies").Subrouter()
-	jwtRouter.HandleFunc("/login", h.Login).Methods(http.MethodPost)
-	jwtRouter.HandleFunc("/welcome", h.Welcome).Methods(http.MethodGet)
+func (h CookiesHandler) RegisterHandler(router *mux.Router) {
+	userRouter := router.PathPrefix("/user").Subrouter()
+	userRouter.HandleFunc("/login", h.Login).Methods(http.MethodPost)
+	userRouter.HandleFunc("/welcome", h.Welcome).Methods(http.MethodGet)
 }
 
 func (h CookiesHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -35,45 +41,64 @@ func (h CookiesHandler) Login(w http.ResponseWriter, r *http.Request) {
 	// Get the JSON body and decode into credentials
 	err := json.NewDecoder(r.Body).Decode(&userCredentials)
 	if err != nil {
-		// If the structure of the body is wrong, return an HTTP error
-		w.WriteHeader(http.StatusBadRequest)
+		log.Println("Body decoding error:", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	persistedUser, err := h.Service.ReadUser(r.Context(), userCredentials.Username)
+	persistedUser, err := h.userService.ReadUser(r.Context(), userCredentials)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		log.Println("User read error:", err)
+		constants.ResolveResponse(w, err)
 		return
 	}
 
 	// If it is the same as the password we received, then we can move ahead if NOT, then we return an "Unauthorized" status
 	if persistedUser.Password != userCredentials.Password {
+		log.Println("User authorization did not pass")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	// Create a new random session token
-	sessionToken := base64.URLEncoding.EncodeToString([]byte(userCredentials.Username))
+	sessionToken, err := h.tokenService.GenerateToken(domain.UserDTO{UserCredentials: userCredentials})
+	if err != nil {
+		log.Println("Token generation error:", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	// Finally, we set the client cookie for "session_token" as the session token we just generated
 	// we also set an expiry time of 120 seconds, the same as the cache
 	http.SetCookie(w, &http.Cookie{
-		Name:    h.TokenName,
+		Name:    h.tokenName,
 		Value:   sessionToken,
-		Expires: time.Now().Add(120 * time.Second),
+		Expires: time.Now().Add(h.expiration * time.Second),
 	})
+
+	w.Header().Set("Content-Type", "application/json")
+	user, err := json.Marshal(persistedUser)
+	if err != nil {
+		log.Println("User marshalling error:", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(user)
 }
 
 func (h CookiesHandler) Welcome(w http.ResponseWriter, r *http.Request) {
 	// We can obtain the session token from the requests cookies, which come with every request
-	c, err := r.Cookie(h.TokenName)
+	c, err := r.Cookie(h.tokenName)
 	if err != nil {
 		if err == http.ErrNoCookie {
 			// If the cookie is not set, return an unauthorized status
+			log.Println("Token not found")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 		// For any other type of error, return a bad request status
+		log.Println("Cookie fetching error", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -81,20 +106,14 @@ func (h CookiesHandler) Welcome(w http.ResponseWriter, r *http.Request) {
 	sessionToken := c.Value
 
 	// We then get the name of the user from our cache, where we set the session token
-	response, err := base64.URLEncoding.DecodeString(sessionToken)
-
+	// Create a new random session token
+	username, err := h.tokenService.ParseToken(sessionToken)
 	if err != nil {
-		// If there is an error fetching from cache, return an internal server error status
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	if response == nil {
-		// If the session token is not present in cache, return an unauthorized error
-		w.WriteHeader(http.StatusUnauthorized)
+		log.Println("Token parsing error:", err)
+		constants.ResolveResponse(w, err)
 		return
 	}
 
 	// Finally, return the welcome message to the user
-	_, _ = w.Write([]byte(fmt.Sprintf("Welcome %s!", response)))
+	_, _ = w.Write([]byte(fmt.Sprintf("Welcome %s!", username)))
 }
