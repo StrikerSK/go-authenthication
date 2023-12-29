@@ -36,7 +36,7 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&userCredentials)
 	if err != nil {
 		// If the structure of the body is wrong, return an HTTP error
-		log.Printf("Body decoding error: %s\n", err)
+		log.Println("Body decoding error:", err)
 		constants.ResolveResponse(w, err)
 		return
 	}
@@ -44,7 +44,7 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 	persistedUser, err := h.userService.ReadUser(r.Context(), userCredentials)
 	if err != nil {
 		// If the structure of the body is wrong, return an HTTP error
-		log.Printf("User read error: %s\n", err)
+		log.Println("User read error:", err)
 		constants.ResolveResponse(w, err)
 		return
 	}
@@ -53,13 +53,15 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 	// AND, if it is the same as the password we received, then we can move ahead
 	// if NOT, then we return an "Unauthorized" status
 	if userCredentials.Password != persistedUser.Password {
+		log.Println("User authorization did not pass")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	userToken, err := h.authService.GenerateToken(persistedUser)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
+		log.Println("Token generation error:", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -67,7 +69,8 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	user, err := json.Marshal(persistedUser)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
+		log.Println("User marshalling error:", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -76,9 +79,15 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 func (h JwtHandler) Welcome(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Authorization")
+	if token == "" {
+		log.Println("Cannot get token from header")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	username, err := h.authService.ParseToken(token)
 	if err != nil {
-		log.Printf("Welcome() error: %s\n", err)
+		log.Println("Token parsing error:", err)
 		constants.ResolveResponse(w, err)
 		return
 	}

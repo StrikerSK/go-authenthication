@@ -25,7 +25,7 @@ func (c *UserCredentials) ClearPassword() {
 func (c *UserCredentials) EncryptPassword() {
 	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(c.Password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Printf("password decryption error: %s\n", err)
+		log.Println("password decryption error:", err)
 	}
 
 	c.Password = string(encryptedPassword)

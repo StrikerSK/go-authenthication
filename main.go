@@ -39,7 +39,7 @@ func main() {
 		handlers = append(handlers, jwtHandling)
 		break
 	case "cookies":
-		log.Println("Cookies endpoint handling  selected")
+		log.Println("Cookies endpoint handling selected")
 		cookiesHandling := userhandlers.NewCookiesHandler(&userService, authorizationService, authorizationConfig)
 		handlers = append(handlers, cookiesHandling)
 		break

@@ -1,10 +1,8 @@
 package config
 
 import (
-	"fmt"
 	"github.com/spf13/viper"
 	"log"
-	"os"
 )
 
 type Application struct {
@@ -42,11 +40,10 @@ type ApplicationConfiguration struct {
 func ReadConfiguration() *ApplicationConfiguration {
 	viper.AddConfigPath(".")
 	viper.SetConfigName("config")
-	err := viper.ReadInConfig()
 
+	err := viper.ReadInConfig()
 	if err != nil {
-		fmt.Printf("%v", err)
-		os.Exit(-1)
+		log.Fatal("Configuration reading error", err)
 	}
 
 	configuration := &ApplicationConfiguration{
