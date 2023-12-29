@@ -3,6 +3,7 @@ module github.com/strikersk/user-auth
 go 1.16
 
 require (
+	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/uuid v1.4.0
 	github.com/gorilla/mux v1.8.1
