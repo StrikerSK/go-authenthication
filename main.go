@@ -35,7 +35,7 @@ func main() {
 	switch authorizationConfig.AuthorizationType {
 	case "jwt":
 		log.Println("JWT endpoint handling  selected")
-		jwtHandling := userhandlers.NewJwtHandler(&userService, authorizationService)
+		jwtHandling := userhandlers.NewJwtHandler(&userService, authorizationService, authorizationConfig)
 		handlers = append(handlers, jwtHandling)
 		break
 	case "cookies":

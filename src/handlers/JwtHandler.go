@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/strikersk/user-auth/config"
 	"github.com/strikersk/user-auth/constants"
 	"github.com/strikersk/user-auth/src/domain"
 	"github.com/strikersk/user-auth/src/ports"
@@ -12,12 +13,14 @@ import (
 )
 
 type JwtHandler struct {
+	tokenName   string
 	userService ports.IUserService
 	authService ports.IAuthorizationService
 }
 
-func NewJwtHandler(userService ports.IUserService, authService ports.IAuthorizationService) JwtHandler {
+func NewJwtHandler(userService ports.IUserService, authService ports.IAuthorizationService, configuration config.Authorization) JwtHandler {
 	return JwtHandler{
+		tokenName:   configuration.AuthorizationHeader,
 		userService: userService,
 		authService: authService,
 	}
@@ -65,7 +68,7 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Authorization", userToken)
+	w.Header().Set(h.tokenName, userToken)
 	w.Header().Set("Content-Type", "application/json")
 	user, err := json.Marshal(persistedUser)
 	if err != nil {
@@ -78,7 +81,7 @@ func (h JwtHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h JwtHandler) Welcome(w http.ResponseWriter, r *http.Request) {
-	token := r.Header.Get("Authorization")
+	token := r.Header.Get(h.tokenName)
 	if token == "" {
 		log.Println("Cannot get token from header")
 		w.WriteHeader(http.StatusUnauthorized)
