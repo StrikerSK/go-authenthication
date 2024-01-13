@@ -3,6 +3,7 @@ package userServices
 import (
 	"errors"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"github.com/strikersk/user-auth/config"
 	"github.com/strikersk/user-auth/constants"
 	"github.com/strikersk/user-auth/src/domain"
@@ -12,12 +13,14 @@ import (
 type JWTEncodingService struct {
 	secret     string
 	expiration time.Duration
+	sessionID  string
 }
 
 func NewJWTEncodingService(authorization config.Authorization) JWTEncodingService {
 	return JWTEncodingService{
 		secret:     authorization.JWT.TokenEncoding,
 		expiration: time.Duration(authorization.TokenExpiration),
+		sessionID:  uuid.NewString(),
 	}
 }
 
@@ -32,6 +35,10 @@ func (receiver JWTEncodingService) ParseToken(signedToken string) (string, error
 
 	if err != nil {
 		return "", err
+	}
+
+	if !token.Valid {
+		return "", errors.New(constants.InvalidJwtToken)
 	}
 
 	claims, ok := token.Claims.(*domain.UserClaims)
@@ -55,6 +62,7 @@ func (receiver JWTEncodingService) GenerateToken(user domain.UserDTO) (signedTok
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(currentTime.Add(time.Second * receiver.expiration)),
 			IssuedAt:  jwt.NewNumericDate(currentTime),
+			ID:        receiver.sessionID,
 		},
 	}
 
