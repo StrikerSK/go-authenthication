@@ -11,8 +11,8 @@ type CookiesHandler struct {
 	expiration time.Duration
 }
 
-func NewCookiesHandler(configuration config.Authorization) CookiesHandler {
-	return CookiesHandler{
+func NewCookiesHandler(configuration config.Authorization) *CookiesHandler {
+	return &CookiesHandler{
 		tokenName:  configuration.AuthorizationHeader,
 		expiration: time.Duration(configuration.TokenExpiration),
 	}
