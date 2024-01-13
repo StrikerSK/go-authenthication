@@ -24,8 +24,6 @@ func (h *CookiesHandler) WriteAuthorizationHeader(token string, w http.ResponseW
 		Value:   token,
 		Expires: time.Now().Add(h.expiration * time.Second),
 	})
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func (h *CookiesHandler) ReadAuthorizationHeader(r *http.Request) (string, error) {

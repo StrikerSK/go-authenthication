@@ -61,8 +61,6 @@ func (h AbstractHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.userEndpoint.WriteAuthorizationHeader(token, w)
-
 	w.Header().Set("Content-Type", "application/json")
 	user, err := json.Marshal(persistedUser)
 	if err != nil {
@@ -71,6 +69,7 @@ func (h AbstractHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.userEndpoint.WriteAuthorizationHeader(token, w)
 	w.Write(user)
 }
 
