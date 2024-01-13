@@ -64,7 +64,7 @@ func (h UserLoginHandler) Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	user, err := json.Marshal(persistedUser)
 	if err != nil {
-		log.Println("Error marshalling data", err)
+		log.Println("Error marshalling data: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -76,22 +76,18 @@ func (h UserLoginHandler) Login(w http.ResponseWriter, r *http.Request) {
 func (h UserLoginHandler) Welcome(w http.ResponseWriter, r *http.Request) {
 	token, err := h.userEndpoint.GetAuthorization(r)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		log.Print("Error retrieving token: ", err)
+		constants.ResolveResponse(w, err)
 		return
 	}
 
-	sessionToken := token
-
 	// We then get the name of the user from our cache, where we set the session token
 	// Create a new random session token
-	username, err := h.tokenService.ParseToken(sessionToken)
+	username, err := h.tokenService.ParseToken(token)
 	if err != nil {
-		switch err.Error() {
-		case constants.ExpiredTokenConstant:
-			w.WriteHeader(http.StatusUnauthorized)
-		default:
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+		log.Print("Error parsing token: ", err)
+		constants.ResolveResponse(w, err)
+		return
 	}
 
 	// Finally, return the welcome message to the user

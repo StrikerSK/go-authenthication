@@ -58,15 +58,15 @@ func resolveEncodingType(configuration appConfigs.Authorization) userPorts.IAuth
 }
 
 func resolveUserAuthorization(authorizationConfig appConfigs.Authorization) userPorts.IUserEndpointHandler {
-	switch authorizationConfig.TokenEncodingType {
-	case "jwt":
-		log.Println("JWT Token handling selected")
+	switch authorizationConfig.AuthorizationType {
+	case "header":
+		log.Println("Header authorization handling selected")
 		return userhandlers.NewHeaderAuthorization(authorizationConfig)
 	case "cookies":
-		log.Println("Cookies handling selected")
+		log.Println("Cookies authorization handling selected")
 		return userhandlers.NewCookiesAuthorization(authorizationConfig)
 	default:
-		log.Fatal("Authorization handling selected")
+		log.Fatal("No authorization handling selected")
 		return nil
 	}
 }
