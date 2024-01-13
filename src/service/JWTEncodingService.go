@@ -47,6 +47,10 @@ func (receiver JWTEncodingService) ParseToken(signedToken string) (string, error
 		return "", err
 	}
 
+	if claims.ID != receiver.sessionID {
+		return "", errors.New(constants.InvalidJwtToken)
+	}
+
 	if claims.ExpiresAt.Before(time.Now().Local()) {
 		err = errors.New(constants.ExpiredTokenConstant)
 		return "", err
