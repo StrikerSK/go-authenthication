@@ -2,31 +2,26 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/strikersk/user-auth/config"
 	"github.com/strikersk/user-auth/constants"
 	"github.com/strikersk/user-auth/src/domain"
 	"github.com/strikersk/user-auth/src/ports"
 	"log"
 	"net/http"
-	"time"
 )
 
 type AbstractHandler struct {
-	tokenName    string
-	expiration   time.Duration
 	userService  ports.IUserService
 	tokenService ports.IAuthorizationService
+	userEndpoint ports.IUserEndpointHandler
 }
 
-func NewAbstractHandler(userService ports.IUserService, tokenService ports.IAuthorizationService, configuration config.Authorization) AbstractHandler {
+func NewAbstractHandler(userService ports.IUserService, tokenService ports.IAuthorizationService, userEndpoint ports.IUserEndpointHandler) AbstractHandler {
 	return AbstractHandler{
-		tokenName:    configuration.AuthorizationHeader,
-		expiration:   time.Duration(configuration.TokenExpiration),
 		userService:  userService,
 		tokenService: tokenService,
+		userEndpoint: userEndpoint,
 	}
 }
 
@@ -66,7 +61,7 @@ func (h AbstractHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.writeHeader(token, w)
+	h.userEndpoint.WriteAuthorizationHeader(token, w)
 
 	w.Header().Set("Content-Type", "application/json")
 	user, err := json.Marshal(persistedUser)
@@ -79,12 +74,8 @@ func (h AbstractHandler) Login(w http.ResponseWriter, r *http.Request) {
 	w.Write(user)
 }
 
-func (h *AbstractHandler) writeHeader(token string, w http.ResponseWriter) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
 func (h AbstractHandler) Welcome(w http.ResponseWriter, r *http.Request) {
-	token, err := h.readAuthorizationHeader(r)
+	token, err := h.userEndpoint.ReadAuthorizationHeader(r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -106,8 +97,4 @@ func (h AbstractHandler) Welcome(w http.ResponseWriter, r *http.Request) {
 
 	// Finally, return the welcome message to the user
 	_, _ = w.Write([]byte(fmt.Sprintf("Welcome %s!", username)))
-}
-
-func (h *AbstractHandler) readAuthorizationHeader(r *http.Request) (string, error) {
-	return "", errors.New("not implemented")
 }

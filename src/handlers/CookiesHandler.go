@@ -2,24 +2,23 @@ package handlers
 
 import (
 	"github.com/strikersk/user-auth/config"
-	"github.com/strikersk/user-auth/src/ports"
 	"net/http"
 	"time"
 )
 
 type CookiesHandler struct {
-	AbstractHandler
+	tokenName  string
+	expiration time.Duration
 }
 
-func NewCookiesHandler(userService ports.IUserService, tokenService ports.IAuthorizationService, configuration config.Authorization) CookiesHandler {
+func NewCookiesHandler(configuration config.Authorization) CookiesHandler {
 	return CookiesHandler{
-		AbstractHandler: NewAbstractHandler(userService, tokenService, configuration),
+		tokenName:  configuration.AuthorizationHeader,
+		expiration: time.Duration(configuration.TokenExpiration),
 	}
 }
 
-func (h *CookiesHandler) writeHeader(token string, w http.ResponseWriter) {
-	// Finally, we set the client cookie for "session_token" as the session token we just generated
-	// we also set an expiry time of 120 seconds, the same as the cache
+func (h *CookiesHandler) WriteAuthorizationHeader(token string, w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{
 		Name:    h.tokenName,
 		Value:   token,
@@ -29,7 +28,7 @@ func (h *CookiesHandler) writeHeader(token string, w http.ResponseWriter) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *CookiesHandler) readAuthorizationHeader(r *http.Request) (string, error) {
+func (h *CookiesHandler) ReadAuthorizationHeader(r *http.Request) (string, error) {
 	c, err := r.Cookie(h.tokenName)
 	if err != nil {
 		return "", err
