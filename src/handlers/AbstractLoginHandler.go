@@ -69,12 +69,12 @@ func (h AbstractHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.userEndpoint.WriteAuthorizationHeader(token, w)
+	h.userEndpoint.AddAuthorization(token, w)
 	w.Write(user)
 }
 
 func (h AbstractHandler) Welcome(w http.ResponseWriter, r *http.Request) {
-	token, err := h.userEndpoint.ReadAuthorizationHeader(r)
+	token, err := h.userEndpoint.GetAuthorization(r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return

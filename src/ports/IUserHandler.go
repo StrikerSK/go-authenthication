@@ -10,6 +10,6 @@ type IUserHandler interface {
 }
 
 type IUserEndpointHandler interface {
-	WriteAuthorizationHeader(token string, w http.ResponseWriter)
-	ReadAuthorizationHeader(r *http.Request) (string, error)
+	AddAuthorization(token string, w http.ResponseWriter)
+	GetAuthorization(r *http.Request) (string, error)
 }
