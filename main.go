@@ -43,11 +43,11 @@ func main() {
 	log.Println(http.ListenAndServe(address, corsHandler))
 }
 
-func resolveEncodingType(configuration appConfigs.Authorization) userPorts.IAuthorizationService {
+func resolveEncodingType(configuration appConfigs.Authorization) userPorts.IEncodingService {
 	switch configuration.TokenEncodingType {
 	case "jwt":
 		log.Println("JWT Token encoding selected")
-		return userServices.NewJWTService(configuration)
+		return userServices.NewJWTEncodingService(configuration)
 	case "base64":
 		log.Println("Base64 Token encoding selected")
 		return userServices.NewBase64EncodingService()

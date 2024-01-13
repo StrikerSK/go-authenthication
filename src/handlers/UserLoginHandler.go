@@ -13,11 +13,11 @@ import (
 
 type UserLoginHandler struct {
 	userService  ports.IUserService
-	tokenService ports.IAuthorizationService
+	tokenService ports.IEncodingService
 	userEndpoint ports.IUserEndpointHandler
 }
 
-func NewUserLoginHandler(userService ports.IUserService, tokenService ports.IAuthorizationService, userEndpoint ports.IUserEndpointHandler) UserLoginHandler {
+func NewUserLoginHandler(userService ports.IUserService, tokenService ports.IEncodingService, userEndpoint ports.IUserEndpointHandler) UserLoginHandler {
 	return UserLoginHandler{
 		userService:  userService,
 		tokenService: tokenService,

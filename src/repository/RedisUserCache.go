@@ -63,7 +63,7 @@ func (receiver RedisCache) RetrieveCache(ctx context.Context, username string) (
 	val, err := receiver.redisClient.Get(ctx, cachePrefix+username).Result()
 
 	if err != nil {
-		if err == redis.Nil {
+		if err.Error() == redis.Nil.Error() {
 			return domain.UserDTO{}, false, nil
 		} else {
 			return domain.UserDTO{}, false, err
