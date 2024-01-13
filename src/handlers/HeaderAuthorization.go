@@ -8,21 +8,21 @@ import (
 	"net/http"
 )
 
-type JwtHandler struct {
+type HeaderAuthorization struct {
 	tokenName string
 }
 
-func NewJwtHandler(configuration config.Authorization) *JwtHandler {
-	return &JwtHandler{
+func NewHeaderAuthorization(configuration config.Authorization) *HeaderAuthorization {
+	return &HeaderAuthorization{
 		tokenName: configuration.AuthorizationHeader,
 	}
 }
 
-func (h *JwtHandler) AddAuthorization(token string, w http.ResponseWriter) {
+func (h *HeaderAuthorization) AddAuthorization(token string, w http.ResponseWriter) {
 	w.Header().Set(h.tokenName, token)
 }
 
-func (h *JwtHandler) GetAuthorization(r *http.Request) (string, error) {
+func (h *HeaderAuthorization) GetAuthorization(r *http.Request) (string, error) {
 	token := r.Header.Get(h.tokenName)
 
 	if token == "" {

@@ -10,20 +10,20 @@ import (
 	"net/http"
 )
 
-type UserHandler struct {
+type UserRegisterHandler struct {
 	service ports.IUserService
 }
 
-func NewUserHandler(service ports.IUserService) UserHandler {
-	return UserHandler{service: service}
+func NewUserRegisterHandler(service ports.IUserService) UserRegisterHandler {
+	return UserRegisterHandler{service: service}
 }
 
-func (h UserHandler) RegisterHandler(router *mux.Router) {
+func (h UserRegisterHandler) RegisterHandler(router *mux.Router) {
 	userRouter := router.PathPrefix("/user").Subrouter()
 	userRouter.HandleFunc("/register", h.createUser).Methods("POST")
 }
 
-func (h UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
+func (h UserRegisterHandler) createUser(w http.ResponseWriter, r *http.Request) {
 	var user domain.UserDTO
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		log.Println("User decoding error:", err)

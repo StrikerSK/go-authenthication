@@ -6,19 +6,19 @@ import (
 	"time"
 )
 
-type CookiesHandler struct {
+type CookiesAuthorization struct {
 	tokenName  string
 	expiration time.Duration
 }
 
-func NewCookiesHandler(configuration config.Authorization) *CookiesHandler {
-	return &CookiesHandler{
+func NewCookiesAuthorization(configuration config.Authorization) *CookiesAuthorization {
+	return &CookiesAuthorization{
 		tokenName:  configuration.AuthorizationHeader,
 		expiration: time.Duration(configuration.TokenExpiration),
 	}
 }
 
-func (h *CookiesHandler) AddAuthorization(token string, w http.ResponseWriter) {
+func (h *CookiesAuthorization) AddAuthorization(token string, w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{
 		Name:    h.tokenName,
 		Value:   token,
@@ -26,7 +26,7 @@ func (h *CookiesHandler) AddAuthorization(token string, w http.ResponseWriter) {
 	})
 }
 
-func (h *CookiesHandler) GetAuthorization(r *http.Request) (string, error) {
+func (h *CookiesAuthorization) GetAuthorization(r *http.Request) (string, error) {
 	c, err := r.Cookie(h.tokenName)
 	if err != nil {
 		return "", err

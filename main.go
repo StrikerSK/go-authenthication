@@ -25,14 +25,11 @@ func main() {
 	userRepo := userRepository.NewLocalUserRepository()
 	userCache := userRepository.NewRedisCache(cacheConfiguration)
 	userService := userServices.NewUserService(&userRepo, userCache)
-	userRegisterHandler := userhandlers.NewUserHandler(userService)
-
 	userAuthorization := resolveUserAuthorization(authorizationConfig)
-	userAccessHandler := userhandlers.NewAbstractHandler(userService, encodingService, userAuthorization)
 
 	handlers := []userPorts.IUserHandler{
-		userAccessHandler,
-		userRegisterHandler,
+		userhandlers.NewUserRegisterHandler(userService),
+		userhandlers.NewUserLoginHandler(userService, encodingService, userAuthorization),
 	}
 
 	for _, handler := range handlers {
@@ -64,10 +61,10 @@ func resolveUserAuthorization(authorizationConfig appConfigs.Authorization) user
 	switch authorizationConfig.TokenEncodingType {
 	case "jwt":
 		log.Println("JWT Token handling selected")
-		return userhandlers.NewJwtHandler(authorizationConfig)
+		return userhandlers.NewHeaderAuthorization(authorizationConfig)
 	case "cookies":
 		log.Println("Cookies handling selected")
-		return userhandlers.NewCookiesHandler(authorizationConfig)
+		return userhandlers.NewCookiesAuthorization(authorizationConfig)
 	default:
 		log.Fatal("Authorization handling selected")
 		return nil

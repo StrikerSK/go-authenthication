@@ -11,27 +11,27 @@ import (
 	"net/http"
 )
 
-type AbstractHandler struct {
+type UserLoginHandler struct {
 	userService  ports.IUserService
 	tokenService ports.IAuthorizationService
 	userEndpoint ports.IUserEndpointHandler
 }
 
-func NewAbstractHandler(userService ports.IUserService, tokenService ports.IAuthorizationService, userEndpoint ports.IUserEndpointHandler) AbstractHandler {
-	return AbstractHandler{
+func NewUserLoginHandler(userService ports.IUserService, tokenService ports.IAuthorizationService, userEndpoint ports.IUserEndpointHandler) UserLoginHandler {
+	return UserLoginHandler{
 		userService:  userService,
 		tokenService: tokenService,
 		userEndpoint: userEndpoint,
 	}
 }
 
-func (h AbstractHandler) RegisterHandler(router *mux.Router) {
+func (h UserLoginHandler) RegisterHandler(router *mux.Router) {
 	userRouter := router.PathPrefix("/user").Subrouter()
 	userRouter.HandleFunc("/login", h.Login).Methods(http.MethodPost)
 	userRouter.HandleFunc("/welcome", h.Welcome).Methods(http.MethodGet)
 }
 
-func (h AbstractHandler) Login(w http.ResponseWriter, r *http.Request) {
+func (h UserLoginHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var userCredentials domain.UserCredentials
 
 	// Get the JSON body and decode into credentials
@@ -73,7 +73,7 @@ func (h AbstractHandler) Login(w http.ResponseWriter, r *http.Request) {
 	w.Write(user)
 }
 
-func (h AbstractHandler) Welcome(w http.ResponseWriter, r *http.Request) {
+func (h UserLoginHandler) Welcome(w http.ResponseWriter, r *http.Request) {
 	token, err := h.userEndpoint.GetAuthorization(r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
