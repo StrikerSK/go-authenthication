@@ -7,6 +7,7 @@ import (
 	"github.com/strikersk/user-auth/config"
 	"github.com/strikersk/user-auth/constants"
 	"github.com/strikersk/user-auth/src/domain"
+	"log"
 	"time"
 )
 
@@ -38,7 +39,7 @@ func (receiver JWTEncodingService) ParseToken(signedToken string) (string, error
 	}
 
 	if !token.Valid {
-		return "", errors.New(constants.InvalidJwtToken)
+		return "", errors.New(constants.InvalidAuthorizationToken)
 	}
 
 	claims, ok := token.Claims.(*domain.UserClaims)
@@ -48,11 +49,13 @@ func (receiver JWTEncodingService) ParseToken(signedToken string) (string, error
 	}
 
 	if claims.ID != receiver.sessionID {
-		return "", errors.New(constants.InvalidJwtToken)
+		log.Print("Token from different session used")
+		return "", errors.New(constants.InvalidAuthorizationToken)
 	}
 
 	if claims.ExpiresAt.Before(time.Now().Local()) {
-		err = errors.New(constants.ExpiredTokenConstant)
+		log.Print("Expired authorization token")
+		err = errors.New(constants.ExpiredAuthorizationToken)
 		return "", err
 	}
 

@@ -63,7 +63,7 @@ func (h UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	persistedUser, err := h.userService.ReadUser(r.Context(), userCredentials)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
