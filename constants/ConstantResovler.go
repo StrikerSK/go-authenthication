@@ -4,7 +4,7 @@ import "net/http"
 
 func ResolveResponse(w http.ResponseWriter, err error) {
 	switch err.Error() {
-	case ExpiredTokenConstant:
+	case ExpiredTokenConstant, MissingJwtToken:
 		w.WriteHeader(http.StatusUnauthorized)
 	case NotFoundConstant:
 		w.WriteHeader(http.StatusNotFound)

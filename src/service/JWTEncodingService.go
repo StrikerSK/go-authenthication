@@ -9,19 +9,19 @@ import (
 	"time"
 )
 
-type JWTService struct {
+type JWTEncodingService struct {
 	secret     string
 	expiration time.Duration
 }
 
-func NewJWTService(authorization config.Authorization) JWTService {
-	return JWTService{
+func NewJWTEncodingService(authorization config.Authorization) JWTEncodingService {
+	return JWTEncodingService{
 		secret:     authorization.JWT.TokenEncoding,
 		expiration: time.Duration(authorization.TokenExpiration),
 	}
 }
 
-func (receiver JWTService) ParseToken(signedToken string) (string, error) {
+func (receiver JWTEncodingService) ParseToken(signedToken string) (string, error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&domain.UserClaims{},
@@ -48,7 +48,7 @@ func (receiver JWTService) ParseToken(signedToken string) (string, error) {
 	return claims.User.Username, nil
 }
 
-func (receiver JWTService) GenerateToken(user domain.UserDTO) (signedToken string, err error) {
+func (receiver JWTEncodingService) GenerateToken(user domain.UserDTO) (signedToken string, err error) {
 	currentTime := time.Now().Local()
 	claims := &domain.UserClaims{
 		User: user,

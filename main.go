@@ -19,55 +19,53 @@ func main() {
 	authorizationConfig := applicationConfiguration.Authorization
 	cacheConfiguration := applicationConfiguration.Cache
 
-	appRoute := mux.NewRouter().PathPrefix(applicationConfig.ContextPath).Subrouter()
-
-	authorizationService := resolveEncodingType(authorizationConfig)
+	applicationRouter := mux.NewRouter().PathPrefix(applicationConfig.ContextPath).Subrouter()
+	encodingService := resolveEncodingType(authorizationConfig)
 
 	userRepo := userRepository.NewLocalUserRepository()
 	userCache := userRepository.NewRedisCache(cacheConfiguration)
 	userService := userServices.NewUserService(&userRepo, userCache)
-	userHandling := userhandlers.NewUserHandler(&userService)
+	userAuthorization := resolveUserAuthorization(authorizationConfig)
 
 	handlers := []userPorts.IUserHandler{
-		userHandling,
-	}
-
-	switch authorizationConfig.AuthorizationType {
-	case "jwt":
-		log.Println("JWT endpoint handling  selected")
-		jwtHandling := userhandlers.NewJwtHandler(&userService, authorizationService, authorizationConfig)
-		handlers = append(handlers, jwtHandling)
-		break
-	case "cookies":
-		log.Println("Cookies endpoint handling selected")
-		cookiesHandling := userhandlers.NewCookiesHandler(&userService, authorizationService, authorizationConfig)
-		handlers = append(handlers, cookiesHandling)
-		break
-	default:
-		log.Fatal("unrecognized authorization type")
+		userhandlers.NewUserHandler(userService, encodingService, userAuthorization),
 	}
 
 	for _, handler := range handlers {
-		handler.RegisterHandler(appRoute)
+		handler.RegisterHandler(applicationRouter)
 	}
 
-	corsHandler := cors.AllowAll().Handler(appRoute)
+	corsHandler := cors.AllowAll().Handler(applicationRouter)
 	address := fmt.Sprintf(":%s", applicationConfig.Port)
 
 	log.Println("Listening on port:", applicationConfig.Port)
 	log.Println(http.ListenAndServe(address, corsHandler))
 }
 
-func resolveEncodingType(configuration appConfigs.Authorization) userPorts.IAuthorizationService {
+func resolveEncodingType(configuration appConfigs.Authorization) userPorts.IEncodingService {
 	switch configuration.TokenEncodingType {
 	case "jwt":
 		log.Println("JWT Token encoding selected")
-		return userServices.NewJWTService(configuration)
+		return userServices.NewJWTEncodingService(configuration)
 	case "base64":
 		log.Println("Base64 Token encoding selected")
 		return userServices.NewBase64EncodingService()
 	default:
 		log.Fatal("no token encoding type selected")
+		return nil
+	}
+}
+
+func resolveUserAuthorization(authorizationConfig appConfigs.Authorization) userPorts.IUserEndpointHandler {
+	switch authorizationConfig.AuthorizationType {
+	case "header":
+		log.Println("Header authorization handling selected")
+		return userhandlers.NewHeaderAuthorization(authorizationConfig)
+	case "cookies":
+		log.Println("Cookies authorization handling selected")
+		return userhandlers.NewCookiesAuthorization(authorizationConfig)
+	default:
+		log.Fatal("No authorization handling selected")
 		return nil
 	}
 }

@@ -13,8 +13,8 @@ type LocalUserService struct {
 	userCache      ports.IUserCache
 }
 
-func NewUserService(userRepository ports.IUserRepository, userCache ports.IUserCache) LocalUserService {
-	return LocalUserService{
+func NewUserService(userRepository ports.IUserRepository, userCache ports.IUserCache) *LocalUserService {
+	return &LocalUserService{
 		userRepository: userRepository,
 		userCache:      userCache,
 	}
