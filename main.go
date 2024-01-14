@@ -28,8 +28,7 @@ func main() {
 	userAuthorization := resolveUserAuthorization(authorizationConfig)
 
 	handlers := []userPorts.IUserHandler{
-		userhandlers.NewUserRegisterHandler(userService),
-		userhandlers.NewUserLoginHandler(userService, encodingService, userAuthorization),
+		userhandlers.NewUserHandler(userService, encodingService, userAuthorization),
 	}
 
 	for _, handler := range handlers {

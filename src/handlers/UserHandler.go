@@ -11,27 +11,46 @@ import (
 	"net/http"
 )
 
-type UserLoginHandler struct {
+type UserHandler struct {
 	userService  ports.IUserService
 	tokenService ports.IEncodingService
 	userEndpoint ports.IUserEndpointHandler
 }
 
-func NewUserLoginHandler(userService ports.IUserService, tokenService ports.IEncodingService, userEndpoint ports.IUserEndpointHandler) UserLoginHandler {
-	return UserLoginHandler{
+func NewUserHandler(userService ports.IUserService, tokenService ports.IEncodingService, userEndpoint ports.IUserEndpointHandler) UserHandler {
+	return UserHandler{
 		userService:  userService,
 		tokenService: tokenService,
 		userEndpoint: userEndpoint,
 	}
 }
 
-func (h UserLoginHandler) RegisterHandler(router *mux.Router) {
+func (h UserHandler) RegisterHandler(router *mux.Router) {
 	userRouter := router.PathPrefix("/user").Subrouter()
+	userRouter.HandleFunc("/register", h.createUser).Methods(http.MethodPost)
 	userRouter.HandleFunc("/login", h.Login).Methods(http.MethodPost)
 	userRouter.HandleFunc("/welcome", h.Welcome).Methods(http.MethodGet)
 }
 
-func (h UserLoginHandler) Login(w http.ResponseWriter, r *http.Request) {
+func (h UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
+	var user domain.UserDTO
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		log.Println("User decoding error:", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if err := h.userService.CreateUser(r.Context(), user); err != nil {
+		log.Println("User register error:", err)
+		constants.ResolveResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	return
+}
+
+func (h UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var userCredentials domain.UserCredentials
 
 	// Get the JSON body and decode into credentials
@@ -73,7 +92,7 @@ func (h UserLoginHandler) Login(w http.ResponseWriter, r *http.Request) {
 	w.Write(user)
 }
 
-func (h UserLoginHandler) Welcome(w http.ResponseWriter, r *http.Request) {
+func (h UserHandler) Welcome(w http.ResponseWriter, r *http.Request) {
 	token, err := h.userEndpoint.GetAuthorization(r)
 	if err != nil {
 		log.Print("Error retrieving token: ", err)
