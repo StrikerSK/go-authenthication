@@ -5,6 +5,11 @@ import (
 )
 
 type IEncodingService interface {
-	ParseToken(string) (string, error)
+	ParseToken(*domain.UserCredentials) error
 	GenerateToken(domain.UserDTO) (string, error)
+}
+
+type IPasswordEncryptionService interface {
+	SetPassword(user *domain.UserCredentials) error
+	ValidatePassword(*domain.UserCredentials, string) error
 }
