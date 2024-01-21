@@ -10,8 +10,8 @@ type LocalUserRepository struct {
 	Users []domain.UserDTO
 }
 
-func NewLocalUserRepository() LocalUserRepository {
-	return LocalUserRepository{}
+func NewLocalUserRepository() *LocalUserRepository {
+	return &LocalUserRepository{}
 }
 
 func (r *LocalUserRepository) CreateEntry(user domain.UserDTO) error {

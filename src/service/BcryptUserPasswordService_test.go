@@ -13,7 +13,9 @@ func TestPasswordEncryption(t *testing.T) {
 		Username: "admin",
 		Password: "admin",
 	}
-	passwordService := UserPasswordService{}
+	passwordService := BcryptUserPasswordService{
+		cost: bcrypt.MinCost,
+	}
 	err := passwordService.SetPassword(&user)
 
 	fmt.Println(user.Password)
@@ -22,7 +24,7 @@ func TestPasswordEncryption(t *testing.T) {
 }
 
 func TestPasswordValidation(t *testing.T) {
-	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.DefaultCost)
+	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.MinCost)
 
 	assertedUser := domain.UserCredentials{
 		Username: "admin",
@@ -34,7 +36,7 @@ func TestPasswordValidation(t *testing.T) {
 		Password: "admin",
 	}
 
-	passwordService := UserPasswordService{}
+	passwordService := BcryptUserPasswordService{}
 	err = passwordService.ValidatePassword(assertedUser, expectedUser)
 
 	assert.Nil(t, err, "Error should not be returned")

@@ -11,14 +11,14 @@ import (
 type LocalUserService struct {
 	userRepository      ports.IUserRepository
 	userCache           ports.IUserCache
-	userPasswordService ports.IPasswordEncryptionService
+	userPasswordService ports.IUserPasswordService
 }
 
-func NewUserService(userRepository ports.IUserRepository, userCache ports.IUserCache) *LocalUserService {
+func NewUserService(userRepository ports.IUserRepository, userCache ports.IUserCache, userPasswordService ports.IUserPasswordService) *LocalUserService {
 	return &LocalUserService{
 		userRepository:      userRepository,
 		userCache:           userCache,
-		userPasswordService: &UserPasswordService{},
+		userPasswordService: userPasswordService,
 	}
 }
 

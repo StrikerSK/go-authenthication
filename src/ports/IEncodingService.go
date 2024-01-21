@@ -9,7 +9,7 @@ type IEncodingService interface {
 	GenerateToken(domain.UserDTO) (string, error)
 }
 
-type IPasswordEncryptionService interface {
+type IUserPasswordService interface {
 	SetPassword(*domain.UserCredentials) error
 	ValidatePassword(domain.UserCredentials, domain.UserCredentials) error
 }
