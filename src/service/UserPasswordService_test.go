@@ -28,7 +28,7 @@ func TestPasswordValidation(t *testing.T) {
 		Password: string(encryptedPassword),
 	}
 	passwordService := UserPasswordService{}
-	err = passwordService.ValidatePassword(&user, "admin")
+	err = passwordService.ValidatePassword(user, "admin")
 
 	assert.Nil(t, err, "Error should not be returned")
 }

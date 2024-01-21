@@ -9,14 +9,16 @@ import (
 )
 
 type LocalUserService struct {
-	userRepository ports.IUserRepository
-	userCache      ports.IUserCache
+	userRepository      ports.IUserRepository
+	userCache           ports.IUserCache
+	userPasswordService ports.IPasswordEncryptionService
 }
 
 func NewUserService(userRepository ports.IUserRepository, userCache ports.IUserCache) *LocalUserService {
 	return &LocalUserService{
-		userRepository: userRepository,
-		userCache:      userCache,
+		userRepository:      userRepository,
+		userCache:           userCache,
+		userPasswordService: &UserPasswordService{},
 	}
 }
 
@@ -28,6 +30,11 @@ func (r *LocalUserService) CreateUser(ctx context.Context, user domain.UserDTO) 
 
 	if exists && persistedUser.Username == user.Username {
 		return errors.New(constants.ConflictConstant)
+	}
+
+	err = r.userPasswordService.SetPassword(&user.UserCredentials)
+	if err != nil {
+		return err
 	}
 
 	return r.userRepository.CreateEntry(user)
@@ -52,7 +59,7 @@ func (r *LocalUserService) LoginUser(ctx context.Context, credentials domain.Use
 		return err
 	}
 
-	return user.ValidatePassword(credentials.Password)
+	return r.userPasswordService.ValidatePassword(user.UserCredentials, credentials.Password)
 }
 
 func (r *LocalUserService) fetchUser(ctx context.Context, credentials domain.UserCredentials) (domain.UserDTO, bool, error) {
