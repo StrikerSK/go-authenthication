@@ -22,13 +22,15 @@ func (c *UserCredentials) ClearPassword() {
 	c.Password = ""
 }
 
-func (c *UserCredentials) EncryptPassword() {
+func (c *UserCredentials) EncryptPassword() error {
 	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(c.Password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Println("password decryption error:", err)
+		log.Println("password encryption error:", err)
+		return err
 	}
 
 	c.Password = string(encryptedPassword)
+	return nil
 }
 
 func (c *UserCredentials) ValidatePassword(inputPassword string) error {

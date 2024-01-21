@@ -40,10 +40,19 @@ func (r *LocalUserService) ReadUser(ctx context.Context, credentials domain.User
 	}
 
 	if !exists {
-		return domain.UserDTO{}, errors.New("user does not exist")
+		return domain.UserDTO{}, errors.New(constants.NotFoundConstant)
 	}
 
 	return user, nil
+}
+
+func (r *LocalUserService) LoginUser(ctx context.Context, credentials domain.UserCredentials) error {
+	user, err := r.ReadUser(ctx, credentials)
+	if err != nil {
+		return err
+	}
+
+	return user.ValidatePassword(credentials.Password)
 }
 
 func (r *LocalUserService) fetchUser(ctx context.Context, credentials domain.UserCredentials) (domain.UserDTO, bool, error) {
