@@ -10,6 +10,6 @@ type IEncodingService interface {
 }
 
 type IPasswordEncryptionService interface {
-	SetPassword(user *domain.UserCredentials) error
-	ValidatePassword(domain.UserCredentials, string) error
+	SetPassword(*domain.UserCredentials) error
+	ValidatePassword(domain.UserCredentials, domain.UserCredentials) error
 }

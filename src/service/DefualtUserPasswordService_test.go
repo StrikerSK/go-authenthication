@@ -23,12 +23,19 @@ func TestPasswordEncryption(t *testing.T) {
 
 func TestPasswordValidation(t *testing.T) {
 	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.DefaultCost)
-	user := domain.UserCredentials{
+
+	assertedUser := domain.UserCredentials{
 		Username: "admin",
 		Password: string(encryptedPassword),
 	}
+
+	expectedUser := domain.UserCredentials{
+		Username: "admin",
+		Password: "admin",
+	}
+
 	passwordService := UserPasswordService{}
-	err = passwordService.ValidatePassword(user, "admin")
+	err = passwordService.ValidatePassword(assertedUser, expectedUser)
 
 	assert.Nil(t, err, "Error should not be returned")
 }

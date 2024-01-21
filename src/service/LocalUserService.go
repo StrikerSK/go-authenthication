@@ -59,7 +59,7 @@ func (r *LocalUserService) LoginUser(ctx context.Context, credentials domain.Use
 		return err
 	}
 
-	return r.userPasswordService.ValidatePassword(user.UserCredentials, credentials.Password)
+	return r.userPasswordService.ValidatePassword(user.UserCredentials, credentials)
 }
 
 func (r *LocalUserService) fetchUser(ctx context.Context, credentials domain.UserCredentials) (domain.UserDTO, bool, error) {
