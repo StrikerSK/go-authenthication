@@ -2,6 +2,7 @@ package userRepository
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/strikersk/user-auth/config"
@@ -44,7 +45,7 @@ func NewMemcacheCache(configuration config.CacheConfiguration) (connection Memca
 }
 
 func (receiver MemcacheCache) CreateCache(ctx context.Context, inputUser domain.UserDTO) error {
-	userData, err := inputUser.MarshalJSON()
+	userData, err := json.Marshal(inputUser)
 	if err != nil {
 		return err
 	}

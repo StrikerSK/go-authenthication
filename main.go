@@ -22,11 +22,12 @@ func main() {
 	applicationRouter := mux.NewRouter().PathPrefix(applicationConfig.ContextPath).Subrouter()
 	encodingService := resolveEncodingType(authorizationConfig)
 
-	userRepo := userRepository.NewLocalUserRepository()
-	userCache := userRepository.NewRedisCache(cacheConfiguration)
+	databaseRepository := resolveDatabaseInstance()
+	cacheRepository := resolveCachingInstance(cacheConfiguration)
+
 	userEndpointAuthorization := resolveUserEndpointAuthorization(authorizationConfig)
-	userPasswordService := userServices.NewBcryptUserPasswordService(authorizationConfig.Encryption.Cost)
-	userService := userServices.NewUserService(userRepo, userCache, userPasswordService)
+	userPasswordService := resolvePasswordService(&authorizationConfig.Encryption)
+	userService := userServices.NewUserService(databaseRepository, cacheRepository, userPasswordService)
 
 	handlers := []userPorts.IUserHandler{
 		userhandlers.NewUserHandler(userService, encodingService, userEndpointAuthorization),
@@ -83,6 +84,10 @@ func resolveCachingInstance(configuration appConfigs.CacheConfiguration) userPor
 		log.Fatal("No cache instance selected")
 		return nil
 	}
+}
+
+func resolvePasswordService(configuration *appConfigs.EncryptionConfiguration) userPorts.IUserPasswordService {
+	return userServices.NewBcryptUserPasswordService(configuration)
 }
 
 func resolveDatabaseInstance() userPorts.IUserRepository {

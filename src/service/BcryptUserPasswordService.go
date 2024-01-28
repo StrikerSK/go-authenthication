@@ -1,6 +1,7 @@
 package userServices
 
 import (
+	"github.com/strikersk/user-auth/config"
 	"github.com/strikersk/user-auth/src/domain"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -10,9 +11,9 @@ type BcryptUserPasswordService struct {
 	cost int
 }
 
-func NewBcryptUserPasswordService(cost int) *BcryptUserPasswordService {
+func NewBcryptUserPasswordService(configuration *config.EncryptionConfiguration) *BcryptUserPasswordService {
 	return &BcryptUserPasswordService{
-		cost: cost,
+		cost: configuration.Cost,
 	}
 }
 
