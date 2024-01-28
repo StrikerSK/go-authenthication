@@ -70,6 +70,7 @@ func (h UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	// If it is the same as the password we received, then we can move ahead if NOT, then we return an "Unauthorized" status
 	err = h.userService.LoginUser(r.Context(), userCredentials)
 	if err != nil {
+		fmt.Println("User cannot be logged: ", err)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}

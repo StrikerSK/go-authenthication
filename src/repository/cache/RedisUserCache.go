@@ -1,9 +1,8 @@
-package userRepository
+package cache
 
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/redis/go-redis/v9"
 	"github.com/strikersk/user-auth/config"
 	"github.com/strikersk/user-auth/src/domain"
@@ -16,18 +15,8 @@ type RedisCache struct {
 	expiration  time.Duration
 }
 
-const cachePrefix = "user:"
-
 func NewRedisCache(configuration config.CacheConfiguration) (connection RedisCache) {
-	var address string
-
-	if configuration.URL != "" {
-		address = configuration.URL
-	} else if configuration.Host != "" && configuration.Port != "" {
-		address = fmt.Sprintf("%s:%s", configuration.Host, configuration.Port)
-	} else {
-		log.Fatal("cache address not provided")
-	}
+	address := cacheUrsResolver(configuration)
 
 	redisConnection := redis.NewClient(&redis.Options{
 		Addr: address,

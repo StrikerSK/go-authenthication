@@ -7,7 +7,8 @@ import (
 	appConfigs "github.com/strikersk/user-auth/config"
 	userhandlers "github.com/strikersk/user-auth/src/handlers"
 	userPorts "github.com/strikersk/user-auth/src/ports"
-	userRepository "github.com/strikersk/user-auth/src/repository"
+	database "github.com/strikersk/user-auth/src/repository"
+	caching "github.com/strikersk/user-auth/src/repository/cache"
 	userServices "github.com/strikersk/user-auth/src/service"
 	"log"
 	"net/http"
@@ -22,11 +23,12 @@ func main() {
 	applicationRouter := mux.NewRouter().PathPrefix(applicationConfig.ContextPath).Subrouter()
 	encodingService := resolveEncodingType(authorizationConfig)
 
-	userRepo := userRepository.NewLocalUserRepository()
-	userCache := userRepository.NewRedisCache(cacheConfiguration)
+	databaseRepository := resolveDatabaseInstance()
+	cacheRepository := resolveCachingInstance(cacheConfiguration)
+
 	userEndpointAuthorization := resolveUserEndpointAuthorization(authorizationConfig)
-	userPasswordService := userServices.NewBcryptUserPasswordService(authorizationConfig.Encryption.Cost)
-	userService := userServices.NewUserService(userRepo, userCache, userPasswordService)
+	userPasswordService := resolvePasswordService(&authorizationConfig.Encryption)
+	userService := userServices.NewUserService(databaseRepository, cacheRepository, userPasswordService)
 
 	handlers := []userPorts.IUserHandler{
 		userhandlers.NewUserHandler(userService, encodingService, userEndpointAuthorization),
@@ -40,7 +42,11 @@ func main() {
 	address := fmt.Sprintf(":%s", applicationConfig.Port)
 
 	log.Println("Listening on port:", applicationConfig.Port)
-	log.Println(http.ListenAndServe(address, corsHandler))
+
+	err := http.ListenAndServe(address, corsHandler)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func resolveEncodingType(configuration appConfigs.Authorization) userPorts.IEncodingService {
@@ -69,4 +75,26 @@ func resolveUserEndpointAuthorization(authorizationConfig appConfigs.Authorizati
 		log.Fatal("No authorization handling selected")
 		return nil
 	}
+}
+
+func resolveCachingInstance(configuration appConfigs.CacheConfiguration) userPorts.IUserCache {
+	switch configuration.Name {
+	case "memcache":
+		log.Println("Memcache instance selected")
+		return caching.NewMemcacheCache(configuration)
+	case "redis":
+		log.Println("Redis instance selected")
+		return caching.NewRedisCache(configuration)
+	default:
+		log.Fatal("No cache instance selected")
+		return nil
+	}
+}
+
+func resolvePasswordService(configuration *appConfigs.EncryptionConfiguration) userPorts.IUserPasswordService {
+	return userServices.NewBcryptUserPasswordService(configuration)
+}
+
+func resolveDatabaseInstance() userPorts.IUserRepository {
+	return database.NewLocalUserRepository()
 }

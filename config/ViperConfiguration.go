@@ -29,6 +29,7 @@ type EncryptionConfiguration struct {
 }
 
 type CacheConfiguration struct {
+	Name       string `mapstructure:"Name"`
 	URL        string `mapstructure:"URL"`
 	Host       string `mapstructure:"Host"`
 	Port       string `mapstructure:"Port"`
