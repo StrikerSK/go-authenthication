@@ -1,4 +1,4 @@
-package userRepository
+package database
 
 import (
 	"github.com/strikersk/user-auth/src/domain"

@@ -1,4 +1,4 @@
-package userRepository
+package database
 
 import (
 	"errors"
