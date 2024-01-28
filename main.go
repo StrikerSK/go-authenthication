@@ -7,7 +7,8 @@ import (
 	appConfigs "github.com/strikersk/user-auth/config"
 	userhandlers "github.com/strikersk/user-auth/src/handlers"
 	userPorts "github.com/strikersk/user-auth/src/ports"
-	userRepository "github.com/strikersk/user-auth/src/repository"
+	database "github.com/strikersk/user-auth/src/repository"
+	caching "github.com/strikersk/user-auth/src/repository/cache"
 	userServices "github.com/strikersk/user-auth/src/service"
 	"log"
 	"net/http"
@@ -80,10 +81,10 @@ func resolveCachingInstance(configuration appConfigs.CacheConfiguration) userPor
 	switch configuration.Name {
 	case "memcache":
 		log.Println("Memcache instance selected")
-		return userRepository.NewMemcacheCache(configuration)
+		return caching.NewMemcacheCache(configuration)
 	case "redis":
 		log.Println("Redis instance selected")
-		return userRepository.NewRedisCache(configuration)
+		return caching.NewRedisCache(configuration)
 	default:
 		log.Fatal("No cache instance selected")
 		return nil
@@ -95,5 +96,5 @@ func resolvePasswordService(configuration *appConfigs.EncryptionConfiguration) u
 }
 
 func resolveDatabaseInstance() userPorts.IUserRepository {
-	return userRepository.NewLocalUserRepository()
+	return database.NewLocalUserRepository()
 }

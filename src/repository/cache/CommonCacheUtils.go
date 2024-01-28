@@ -1,4 +1,4 @@
-package userRepository
+package cache
 
 import (
 	"fmt"
