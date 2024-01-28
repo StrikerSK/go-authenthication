@@ -3,7 +3,6 @@ package userRepository
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/strikersk/user-auth/config"
 	"github.com/strikersk/user-auth/src/domain"
@@ -17,15 +16,7 @@ type MemcacheCache struct {
 }
 
 func NewMemcacheCache(configuration config.CacheConfiguration) (connection MemcacheCache) {
-	var address string
-
-	if configuration.URL != "" {
-		address = configuration.URL
-	} else if configuration.Host != "" && configuration.Port != "" {
-		address = fmt.Sprintf("%s:%s", configuration.Host, configuration.Port)
-	} else {
-		log.Fatal("cache address not provide")
-	}
+	address := cacheUrsResolver(configuration)
 
 	cacheConnection := memcache.New(address)
 
