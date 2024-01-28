@@ -41,7 +41,11 @@ func main() {
 	address := fmt.Sprintf(":%s", applicationConfig.Port)
 
 	log.Println("Listening on port:", applicationConfig.Port)
-	log.Println(http.ListenAndServe(address, corsHandler))
+
+	err := http.ListenAndServe(address, corsHandler)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func resolveEncodingType(configuration appConfigs.Authorization) userPorts.IEncodingService {
