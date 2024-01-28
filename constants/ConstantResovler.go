@@ -1,10 +1,13 @@
 package constants
 
-import "net/http"
+import (
+	"golang.org/x/crypto/bcrypt"
+	"net/http"
+)
 
 func ResolveResponse(w http.ResponseWriter, err error) {
 	switch err.Error() {
-	case ExpiredTokenConstant, MissingJwtToken:
+	case ExpiredAuthorizationToken, MissingAuthorizationToken, InvalidAuthorizationToken, bcrypt.ErrMismatchedHashAndPassword.Error():
 		w.WriteHeader(http.StatusUnauthorized)
 	case NotFoundConstant:
 		w.WriteHeader(http.StatusNotFound)

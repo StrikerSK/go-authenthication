@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"errors"
 	"github.com/strikersk/user-auth/config"
+	"github.com/strikersk/user-auth/constants"
 	"net/http"
 	"time"
 )
@@ -28,6 +30,11 @@ func (h *CookiesAuthorization) AddAuthorization(token string, w http.ResponseWri
 
 func (h *CookiesAuthorization) GetAuthorization(r *http.Request) (string, error) {
 	c, err := r.Cookie(h.tokenName)
+
+	if c.Value == "" {
+		return "", errors.New(constants.MissingAuthorizationToken)
+	}
+
 	if err != nil {
 		return "", err
 	}

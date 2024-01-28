@@ -1,9 +1,11 @@
 package constants
 
+// TODO Transform string values to errors
 const (
-	ConflictConstant     = "user already exists"
-	NotFoundConstant     = "user does not exist"
-	ExpiredTokenConstant = "token is expired"
+	ConflictConstant = "user already exists"
+	NotFoundConstant = "user does not exist"
 
-	MissingJwtToken = "missing jwt token"
+	ExpiredAuthorizationToken = "expired authorization token"
+	InvalidAuthorizationToken = "invalid authorization token"
+	MissingAuthorizationToken = "missing authorization token"
 )

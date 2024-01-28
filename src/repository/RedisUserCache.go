@@ -26,7 +26,7 @@ func NewRedisCache(configuration config.CacheConfiguration) (connection RedisCac
 	} else if configuration.Host != "" && configuration.Port != "" {
 		address = fmt.Sprintf("%s:%s", configuration.Host, configuration.Port)
 	} else {
-		log.Fatal("cache address not provide")
+		log.Fatal("cache address not provided")
 	}
 
 	redisConnection := redis.NewClient(&redis.Options{
@@ -75,6 +75,5 @@ func (receiver RedisCache) RetrieveCache(ctx context.Context, username string) (
 		return domain.UserDTO{}, false, err
 	}
 
-	//log.Println("Cache user", user)
 	return user, true, nil
 }

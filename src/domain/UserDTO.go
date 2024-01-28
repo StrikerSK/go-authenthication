@@ -16,9 +16,10 @@ func (u *UserDTO) UnmarshalBinary(data []byte) error {
 	return json.Unmarshal(data, u)
 }
 
-func (u UserDTO) MarshalJSON() ([]byte, error) {
-	customMap := map[string]string{
-		"username": u.Username,
-	}
-	return json.Marshal(customMap)
-}
+//TODO Fix unmarshalling from Redis
+//func (u UserDTO) MarshalJSON() ([]byte, error) {
+//	customMap := map[string]string{
+//		"username": u.Username,
+//	}
+//	return json.Marshal(customMap)
+//}

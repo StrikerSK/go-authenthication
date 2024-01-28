@@ -11,6 +11,8 @@ Authorization:
     ExcludedPaths:
         - /api/user/register
         - /api/user/login
+    Encryption:
+        Cost: 10
 Cache:
     URL: localhost:6379
     Expiration: 300

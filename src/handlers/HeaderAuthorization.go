@@ -27,7 +27,7 @@ func (h *HeaderAuthorization) GetAuthorization(r *http.Request) (string, error) 
 
 	if token == "" {
 		log.Println("Cannot get token from header")
-		return "", errors.New(constants.MissingJwtToken)
+		return "", errors.New(constants.MissingAuthorizationToken)
 	}
 
 	return token, nil

@@ -24,11 +24,12 @@ func main() {
 
 	userRepo := userRepository.NewLocalUserRepository()
 	userCache := userRepository.NewRedisCache(cacheConfiguration)
-	userService := userServices.NewUserService(&userRepo, userCache)
-	userAuthorization := resolveUserAuthorization(authorizationConfig)
+	userEndpointAuthorization := resolveUserEndpointAuthorization(authorizationConfig)
+	userPasswordService := userServices.NewBcryptUserPasswordService(authorizationConfig.Encryption.Cost)
+	userService := userServices.NewUserService(userRepo, userCache, userPasswordService)
 
 	handlers := []userPorts.IUserHandler{
-		userhandlers.NewUserHandler(userService, encodingService, userAuthorization),
+		userhandlers.NewUserHandler(userService, encodingService, userEndpointAuthorization),
 	}
 
 	for _, handler := range handlers {
@@ -56,7 +57,7 @@ func resolveEncodingType(configuration appConfigs.Authorization) userPorts.IEnco
 	}
 }
 
-func resolveUserAuthorization(authorizationConfig appConfigs.Authorization) userPorts.IUserEndpointHandler {
+func resolveUserEndpointAuthorization(authorizationConfig appConfigs.Authorization) userPorts.IUserEndpointHandler {
 	switch authorizationConfig.AuthorizationType {
 	case "header":
 		log.Println("Header authorization handling selected")
