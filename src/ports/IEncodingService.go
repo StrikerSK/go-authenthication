@@ -8,3 +8,8 @@ type IEncodingService interface {
 	ParseToken(string) (string, error)
 	GenerateToken(domain.UserDTO) (string, error)
 }
+
+type IUserPasswordService interface {
+	SetPassword(*domain.UserCredentials) error
+	ValidatePassword(domain.UserCredentials, domain.UserCredentials) error
+}

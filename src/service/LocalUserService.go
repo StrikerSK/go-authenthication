@@ -9,14 +9,16 @@ import (
 )
 
 type LocalUserService struct {
-	userRepository ports.IUserRepository
-	userCache      ports.IUserCache
+	userRepository      ports.IUserRepository
+	userCache           ports.IUserCache
+	userPasswordService ports.IUserPasswordService
 }
 
-func NewUserService(userRepository ports.IUserRepository, userCache ports.IUserCache) *LocalUserService {
+func NewUserService(userRepository ports.IUserRepository, userCache ports.IUserCache, userPasswordService ports.IUserPasswordService) *LocalUserService {
 	return &LocalUserService{
-		userRepository: userRepository,
-		userCache:      userCache,
+		userRepository:      userRepository,
+		userCache:           userCache,
+		userPasswordService: userPasswordService,
 	}
 }
 
@@ -30,6 +32,11 @@ func (r *LocalUserService) CreateUser(ctx context.Context, user domain.UserDTO) 
 		return errors.New(constants.ConflictConstant)
 	}
 
+	err = r.userPasswordService.SetPassword(&user.UserCredentials)
+	if err != nil {
+		return err
+	}
+
 	return r.userRepository.CreateEntry(user)
 }
 
@@ -40,10 +47,19 @@ func (r *LocalUserService) ReadUser(ctx context.Context, credentials domain.User
 	}
 
 	if !exists {
-		return domain.UserDTO{}, errors.New("user does not exist")
+		return domain.UserDTO{}, errors.New(constants.NotFoundConstant)
 	}
 
 	return user, nil
+}
+
+func (r *LocalUserService) LoginUser(ctx context.Context, credentials domain.UserCredentials) error {
+	user, err := r.ReadUser(ctx, credentials)
+	if err != nil {
+		return err
+	}
+
+	return r.userPasswordService.ValidatePassword(user.UserCredentials, credentials)
 }
 
 func (r *LocalUserService) fetchUser(ctx context.Context, credentials domain.UserCredentials) (domain.UserDTO, bool, error) {
