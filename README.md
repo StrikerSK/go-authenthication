@@ -1,17 +1,16 @@
-# Custom User authentication using Go
+# User authentication using Go
 
-This repository is looking for solutions to creating and resolving user sessions.
+This repository is looking for solutions for creating, configuring and resolving user sessions.
 
 #Prerequisites:
-* `.env` files should be present as in example
+* `config.yaml` file should be present as in provided example, currently it has to be in root of the project to detect configuration file properly, therefore please do not move this file 
 
 ## Usage:
-From root directory run:
-1. Run `docker-compose up` 
-2. Run `go build`
-3. Run `./user-auth`
+From **root** directory run:
+1. Run `docker-compose up` to prepare the infrastructure
+2. Run `go run main.go`
 
-Application will run on port `5000`, to see example use this [collection](./postman/UserAuthRequests.json) in Postman.
+Application currently configured to run on localhost port `8080`, to see example use this [collection](./postman/UserAuthRequests.json) in Postman.
 
 ## Resources: 
 * [Using JWT for Authentication in a Golang Application](https://learn.vonage.com/blog/2020/03/13/using-jwt-for-authentication-in-a-golang-application-dr/)
