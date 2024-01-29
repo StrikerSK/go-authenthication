@@ -37,7 +37,7 @@ func NewRedisCache(configuration config.CacheConfiguration) (connection RedisCac
 	}
 }
 
-func (receiver RedisCache) CreateCache(ctx context.Context, inputUser domain.UserDTO) error {
+func (receiver RedisCache) CreateCache(ctx context.Context, inputUser *domain.UserDTO) error {
 	err := receiver.redisClient.Set(ctx, cachePrefix+inputUser.Username, inputUser, time.Second*receiver.expiration).Err()
 	if err != nil {
 		return err
@@ -46,23 +46,21 @@ func (receiver RedisCache) CreateCache(ctx context.Context, inputUser domain.Use
 	return nil
 }
 
-func (receiver RedisCache) RetrieveCache(ctx context.Context, username string) (domain.UserDTO, bool, error) {
-	var user domain.UserDTO
-
-	val, err := receiver.redisClient.Get(ctx, cachePrefix+username).Result()
+func (receiver RedisCache) RetrieveCache(ctx context.Context, user *domain.UserDTO) (bool, error) {
+	val, err := receiver.redisClient.Get(ctx, cachePrefix+user.Username).Result()
 
 	if err != nil {
 		if err.Error() == redis.Nil.Error() {
-			return domain.UserDTO{}, false, nil
+			return false, nil
 		} else {
-			return domain.UserDTO{}, false, err
+			return false, err
 		}
 	}
 
-	err = json.Unmarshal([]byte(val), &user)
+	err = json.Unmarshal([]byte(val), user)
 	if err != nil {
-		return domain.UserDTO{}, false, err
+		return false, err
 	}
 
-	return user, true, nil
+	return true, nil
 }

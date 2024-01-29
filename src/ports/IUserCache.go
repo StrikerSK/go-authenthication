@@ -6,6 +6,6 @@ import (
 )
 
 type IUserCache interface {
-	CreateCache(context.Context, domain.UserDTO) error
-	RetrieveCache(context.Context, string) (domain.UserDTO, bool, error)
+	CreateCache(context.Context, *domain.UserDTO) error
+	RetrieveCache(context.Context, *domain.UserDTO) (bool, error)
 }

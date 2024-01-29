@@ -67,7 +67,7 @@ func (r *LocalUserService) LoginUser(ctx context.Context, credentials domain.Use
 }
 
 func (r *LocalUserService) fetchUser(ctx context.Context, searchedUser *domain.UserDTO) (bool, error) {
-	user, isPresent, err := r.userCache.RetrieveCache(ctx, searchedUser.Username)
+	isPresent, err := r.userCache.RetrieveCache(ctx, searchedUser)
 	if err != nil {
 		return false, err
 	}
@@ -82,7 +82,7 @@ func (r *LocalUserService) fetchUser(ctx context.Context, searchedUser *domain.U
 			return false, nil
 		}
 
-		if err = r.userCache.CreateCache(ctx, user); err != nil {
+		if err = r.userCache.CreateCache(ctx, searchedUser); err != nil {
 			return false, err
 		}
 	}
