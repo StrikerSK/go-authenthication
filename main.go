@@ -23,7 +23,7 @@ func main() {
 	applicationRouter := mux.NewRouter().PathPrefix(applicationConfig.ContextPath).Subrouter()
 	encodingService := resolveEncodingType(authorizationConfig)
 
-	databaseRepository := resolveDatabaseInstance()
+	databaseRepository := resolveDatabaseInstance("sqlite")
 	cacheRepository := resolveCachingInstance(cacheConfiguration)
 
 	userEndpointAuthorization := resolveUserEndpointAuthorization(authorizationConfig)
@@ -95,6 +95,16 @@ func resolvePasswordService(configuration *appConfigs.EncryptionConfiguration) u
 	return userServices.NewBcryptUserPasswordService(configuration)
 }
 
-func resolveDatabaseInstance() userPorts.IUserRepository {
-	return database.NewLocalUserRepository()
+func resolveDatabaseInstance(databaseType string) userPorts.IUserRepository {
+	switch databaseType {
+	case "sqlite":
+		log.Println("SQLite database instance selected")
+		return database.NewGormUserRepository()
+	case "inmemory":
+		log.Println("InMemory database instance selected")
+		return database.NewLocalUserRepository()
+	default:
+		log.Fatal("No database instance selected")
+		return nil
+	}
 }

@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/strikersk/user-auth/src/domain"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"log"
 )
@@ -10,12 +11,19 @@ type GormUserRepository struct {
 	db *gorm.DB
 }
 
-func NewGormUserRepository(db *gorm.DB) GormUserRepository {
-	if err := db.AutoMigrate(&domain.UserDTO{}); err != nil {
+func NewGormUserRepository() *GormUserRepository {
+	dialector := sqlite.Open("./test.db")
+
+	db, err := gorm.Open(dialector, &gorm.Config{})
+	if err != nil {
+		log.Fatal("Database initialization: ", err.Error())
+	}
+
+	if err = db.AutoMigrate(&domain.UserDTO{}); err != nil {
 		log.Fatal("error migrating struct: ", err)
 	}
 
-	return GormUserRepository{
+	return &GormUserRepository{
 		db: db,
 	}
 }
