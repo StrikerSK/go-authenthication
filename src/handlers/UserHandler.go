@@ -40,7 +40,7 @@ func (h UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.userService.CreateUser(r.Context(), user); err != nil {
+	if err := h.userService.CreateUser(r.Context(), &user); err != nil {
 		log.Println("User register error:", err)
 		constants.ResolveResponse(w, err)
 		return
@@ -61,12 +61,6 @@ func (h UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	persistedUser, err := h.userService.ReadUser(r.Context(), userCredentials)
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
 	// If it is the same as the password we received, then we can move ahead if NOT, then we return an "Unauthorized" status
 	err = h.userService.LoginUser(r.Context(), userCredentials)
 	if err != nil {
@@ -76,14 +70,14 @@ func (h UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a new random session token
-	token, err := h.tokenService.GenerateToken(domain.UserDTO{UserCredentials: userCredentials})
+	token, err := h.tokenService.GenerateToken(userCredentials.Username)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	user, err := json.Marshal(persistedUser)
+	user, err := json.Marshal(userCredentials)
 	if err != nil {
 		log.Println("Error marshalling data: ", err)
 		w.WriteHeader(http.StatusInternalServerError)

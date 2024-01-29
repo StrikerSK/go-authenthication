@@ -59,13 +59,13 @@ func (receiver JWTEncodingService) ParseToken(signedToken string) (string, error
 		return "", err
 	}
 
-	return claims.User.Username, nil
+	return claims.Username, nil
 }
 
-func (receiver JWTEncodingService) GenerateToken(user domain.UserDTO) (signedToken string, err error) {
+func (receiver JWTEncodingService) GenerateToken(username string) (signedToken string, err error) {
 	currentTime := time.Now().Local()
 	claims := &domain.UserClaims{
-		User: user,
+		Username: username,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(currentTime.Add(time.Second * receiver.expiration)),
 			IssuedAt:  jwt.NewNumericDate(currentTime),

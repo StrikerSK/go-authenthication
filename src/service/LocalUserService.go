@@ -22,13 +22,13 @@ func NewUserService(userRepository ports.IUserRepository, userCache ports.IUserC
 	}
 }
 
-func (r *LocalUserService) CreateUser(ctx context.Context, user domain.UserDTO) error {
-	persistedUser, exists, err := r.fetchUser(ctx, user.UserCredentials)
+func (r *LocalUserService) CreateUser(ctx context.Context, user *domain.UserDTO) error {
+	exists, err := r.fetchUser(ctx, user)
 	if err != nil && err.Error() != constants.NotFoundConstant {
 		return err
 	}
 
-	if exists && persistedUser.Username == user.Username {
+	if exists {
 		return errors.New(constants.ConflictConstant)
 	}
 
@@ -40,51 +40,52 @@ func (r *LocalUserService) CreateUser(ctx context.Context, user domain.UserDTO) 
 	return r.userRepository.CreateEntry(user)
 }
 
-func (r *LocalUserService) ReadUser(ctx context.Context, credentials domain.UserCredentials) (domain.UserDTO, error) {
-	user, exists, err := r.fetchUser(ctx, credentials)
-	if err != nil {
-		return domain.UserDTO{}, err
-	}
-
-	if !exists {
-		return domain.UserDTO{}, errors.New(constants.NotFoundConstant)
-	}
-
-	return user, nil
-}
-
-func (r *LocalUserService) LoginUser(ctx context.Context, credentials domain.UserCredentials) error {
-	user, err := r.ReadUser(ctx, credentials)
+func (r *LocalUserService) ReadUser(ctx context.Context, searchedUser *domain.UserDTO) error {
+	exists, err := r.fetchUser(ctx, searchedUser)
 	if err != nil {
 		return err
 	}
 
-	return r.userPasswordService.ValidatePassword(user.UserCredentials, credentials)
+	if !exists {
+		return errors.New(constants.NotFoundConstant)
+	}
+
+	return nil
 }
 
-func (r *LocalUserService) fetchUser(ctx context.Context, credentials domain.UserCredentials) (domain.UserDTO, bool, error) {
-	var user domain.UserDTO
-	username := credentials.Username
+func (r *LocalUserService) LoginUser(ctx context.Context, credentials domain.UserCredentials) error {
+	persistedUser := domain.UserDTO{
+		UserCredentials: credentials,
+	}
 
-	user, isPresent, err := r.userCache.RetrieveCache(ctx, username)
+	err := r.ReadUser(ctx, &persistedUser)
 	if err != nil {
-		return domain.UserDTO{}, false, err
+		return err
+	}
+
+	return r.userPasswordService.ValidatePassword(persistedUser.UserCredentials, credentials)
+}
+
+func (r *LocalUserService) fetchUser(ctx context.Context, searchedUser *domain.UserDTO) (bool, error) {
+	user, isPresent, err := r.userCache.RetrieveCache(ctx, searchedUser.Username)
+	if err != nil {
+		return false, err
 	}
 
 	if !isPresent {
-		user, isPresent, err = r.userRepository.ReadEntry(username)
+		isPresent, err = r.userRepository.ReadEntry(searchedUser)
 		if err != nil {
-			return domain.UserDTO{}, false, err
+			return false, err
 		}
 
 		if !isPresent {
-			return domain.UserDTO{}, false, nil
+			return false, nil
 		}
 
 		if err = r.userCache.CreateCache(ctx, user); err != nil {
-			return user, false, err
+			return false, err
 		}
 	}
 
-	return user, true, nil
+	return true, nil
 }

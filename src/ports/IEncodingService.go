@@ -6,7 +6,7 @@ import (
 
 type IEncodingService interface {
 	ParseToken(string) (string, error)
-	GenerateToken(domain.UserDTO) (string, error)
+	GenerateToken(string) (string, error)
 }
 
 type IUserPasswordService interface {
