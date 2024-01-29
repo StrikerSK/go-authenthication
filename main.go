@@ -79,9 +79,9 @@ func resolveUserEndpointAuthorization(authorizationConfig appConfigs.Authorizati
 
 func resolveCachingInstance(configuration appConfigs.CacheConfiguration) userPorts.IUserCache {
 	switch configuration.Name {
-	//case "memcache":
-	//	log.Println("Memcache instance selected")
-	//	return caching.NewMemcacheCache(configuration)
+	case "memcache":
+		log.Println("Memcache instance selected")
+		return caching.NewMemcacheCache(configuration)
 	case "redis":
 		log.Println("Redis instance selected")
 		return caching.NewRedisCache(configuration)
