@@ -14,7 +14,7 @@ Authorization:
     Encryption:
         Cost: 10
 Cache:
-    Name: inmemory
+    Name: redis
     URL: localhost:6379
     Expiration: 300
 Database:

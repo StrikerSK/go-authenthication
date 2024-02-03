@@ -2,8 +2,8 @@ package cache
 
 import (
 	"context"
-	"errors"
-	"github.com/strikersk/user-auth/constants"
+	"fmt"
+	"github.com/strikersk/user-auth/config"
 	"github.com/strikersk/user-auth/src/domain"
 	"log"
 	"time"
@@ -15,18 +15,19 @@ type cachedUser struct {
 }
 
 type InMemoryCache struct {
-	users             []cachedUser
+	users             map[string]cachedUser
 	conditionDuration time.Duration
 }
 
-func NewInMemoryCache() *InMemoryCache {
-	conditionDuration, err := time.ParseDuration("3600s")
+func NewInMemoryCache(configuration config.CacheConfiguration) *InMemoryCache {
+	stringDuration := fmt.Sprintf("%ds", configuration.Expiration)
+	conditionDuration, err := time.ParseDuration(stringDuration)
 	if err != nil {
 		log.Fatal("error parsing duration", err)
 	}
 
 	return &InMemoryCache{
-		users:             make([]cachedUser, 0),
+		users:             make(map[string]cachedUser),
 		conditionDuration: conditionDuration,
 	}
 }
@@ -37,21 +38,21 @@ func (r *InMemoryCache) CreateCache(ctx context.Context, user *domain.UserDTO) e
 		createdAt: time.Now(),
 	}
 
-	r.users = append(r.users, tmpUser)
+	r.users[user.Username] = tmpUser
 	return nil
 }
 
 func (r *InMemoryCache) RetrieveCache(ctx context.Context, searchedUser *domain.UserDTO) (bool, error) {
-	for _, user := range r.users {
-		if searchedUser.Username == user.Username {
-			if user.createdAt.Sub(time.Now()) > r.conditionDuration {
-				return false, nil
-			}
-
-			*searchedUser = user.UserDTO
-			return true, nil
-		}
+	requestTime := time.Now()
+	foundUser, ok := r.users[searchedUser.Username]
+	if !ok {
+		return false, nil
 	}
 
-	return false, errors.New(constants.NotFoundConstant)
+	if requestTime.Sub(foundUser.createdAt) > r.conditionDuration {
+		return false, nil
+	}
+
+	*searchedUser = foundUser.UserDTO
+	return true, nil
 }

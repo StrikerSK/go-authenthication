@@ -82,7 +82,7 @@ func resolveCachingInstance(configuration appConfigs.CacheConfiguration) userPor
 	switch configuration.Name {
 	case appConstants.InMemory:
 		log.Println("InMemory cache instance selected")
-		return caching.NewInMemoryCache()
+		return caching.NewInMemoryCache(configuration)
 	case appConstants.MemCache:
 		log.Println("MemCache instance selected")
 		return caching.NewMemcacheCache(configuration)
