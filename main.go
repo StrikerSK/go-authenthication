@@ -80,6 +80,9 @@ func resolveUserEndpointAuthorization(authorizationConfig appConfigs.Authorizati
 
 func resolveCachingInstance(configuration appConfigs.CacheConfiguration) userPorts.IUserCache {
 	switch configuration.Name {
+	case appConstants.InMemory:
+		log.Println("InMemory cache instance selected")
+		return caching.NewInMemoryCache()
 	case appConstants.MemCache:
 		log.Println("MemCache instance selected")
 		return caching.NewMemcacheCache(configuration)
@@ -87,7 +90,7 @@ func resolveCachingInstance(configuration appConfigs.CacheConfiguration) userPor
 		log.Println("Redis instance selected")
 		return caching.NewRedisCache(configuration)
 	default:
-		log.Fatalf("No cache instance selected, available caches: %s, %s", appConstants.MemCache, appConstants.Redis)
+		log.Fatalf("No cache instance selected, available caches: %s, %s, %s", appConstants.MemCache, appConstants.Redis, appConstants.InMemory)
 		return nil
 	}
 }
