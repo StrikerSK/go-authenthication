@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"github.com/strikersk/user-auth/config"
+	"github.com/strikersk/user-auth/constants"
 	"github.com/strikersk/user-auth/src/domain"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
@@ -52,12 +53,12 @@ func (r *GormUserRepository) ReadEntry(user *domain.UserDTO) (bool, error) {
 
 func resolveDatabase(configuration config.DatabaseConfiguration) gorm.Dialector {
 	switch configuration.Name {
-	case "sqlite":
+	case constants.SQLite:
 		return createSQLiteDialector(configuration)
-	case "postgres":
+	case constants.Postgres:
 		return createPostgresDialector(configuration)
 	default:
-		log.Fatal("Database not selected")
+		log.Fatalf("No persistent database instance selected, available options are: %s, %s", constants.SQLite, constants.Postgres)
 		return nil
 	}
 }
