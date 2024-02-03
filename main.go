@@ -103,7 +103,7 @@ func resolveDatabaseInstance(configuration appConfigs.DatabaseConfiguration) use
 		return database.NewGormUserRepository(configuration)
 	case appConstants.InMemory:
 		log.Println("InMemory database instance selected")
-		return database.NewLocalUserRepository()
+		return database.NewInMemoryUserDatabase()
 	default:
 		log.Fatalf("No database instance selected, available options are: %s, %s, %s", appConstants.InMemory, appConstants.SQLite, appConstants.Postgres)
 		return nil
