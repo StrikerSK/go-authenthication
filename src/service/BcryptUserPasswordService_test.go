@@ -37,7 +37,7 @@ func TestPasswordValidation(t *testing.T) {
 	}
 
 	passwordService := BcryptUserPasswordService{}
-	err = passwordService.ValidatePassword(assertedUser, expectedUser)
+	err = passwordService.ValidatePassword(&assertedUser, &expectedUser)
 
 	assert.Nil(t, err, "Error should not be returned")
 }
