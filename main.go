@@ -5,10 +5,11 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	appConfigs "github.com/strikersk/user-auth/config"
+	appConstants "github.com/strikersk/user-auth/constants"
 	userhandlers "github.com/strikersk/user-auth/src/handlers"
 	userPorts "github.com/strikersk/user-auth/src/ports"
-	database "github.com/strikersk/user-auth/src/repository"
 	caching "github.com/strikersk/user-auth/src/repository/cache"
+	"github.com/strikersk/user-auth/src/repository/database"
 	userServices "github.com/strikersk/user-auth/src/service"
 	"log"
 	"net/http"
@@ -23,7 +24,7 @@ func main() {
 	applicationRouter := mux.NewRouter().PathPrefix(applicationConfig.ContextPath).Subrouter()
 	encodingService := resolveEncodingType(authorizationConfig)
 
-	databaseRepository := resolveDatabaseInstance()
+	databaseRepository := resolveDatabaseInstance(applicationConfiguration.Database)
 	cacheRepository := resolveCachingInstance(cacheConfiguration)
 
 	userEndpointAuthorization := resolveUserEndpointAuthorization(authorizationConfig)
@@ -51,42 +52,42 @@ func main() {
 
 func resolveEncodingType(configuration appConfigs.Authorization) userPorts.IEncodingService {
 	switch configuration.TokenEncodingType {
-	case "jwt":
+	case appConstants.JWT:
 		log.Println("JWT Token encoding selected")
 		return userServices.NewJWTEncodingService(configuration)
-	case "base64":
+	case appConstants.Base64:
 		log.Println("Base64 Token encoding selected")
 		return userServices.NewBase64EncodingService()
 	default:
-		log.Fatal("no token encoding type selected")
+		log.Fatalf("no token encoding type selected, available options: %s, %s", appConstants.JWT, appConstants.Base64)
 		return nil
 	}
 }
 
 func resolveUserEndpointAuthorization(authorizationConfig appConfigs.Authorization) userPorts.IUserEndpointHandler {
 	switch authorizationConfig.AuthorizationType {
-	case "header":
+	case appConstants.Header:
 		log.Println("Header authorization handling selected")
 		return userhandlers.NewHeaderAuthorization(authorizationConfig)
-	case "cookies":
+	case appConstants.Cookies:
 		log.Println("Cookies authorization handling selected")
 		return userhandlers.NewCookiesAuthorization(authorizationConfig)
 	default:
-		log.Fatal("No authorization handling selected")
+		log.Fatalf("No authorization handling selected, available options: %s, %s", appConstants.Header, appConstants.Cookies)
 		return nil
 	}
 }
 
 func resolveCachingInstance(configuration appConfigs.CacheConfiguration) userPorts.IUserCache {
 	switch configuration.Name {
-	case "memcache":
-		log.Println("Memcache instance selected")
+	case appConstants.MemCache:
+		log.Println("MemCache instance selected")
 		return caching.NewMemcacheCache(configuration)
-	case "redis":
+	case appConstants.Redis:
 		log.Println("Redis instance selected")
 		return caching.NewRedisCache(configuration)
 	default:
-		log.Fatal("No cache instance selected")
+		log.Fatalf("No cache instance selected, available caches: %s, %s", appConstants.MemCache, appConstants.Redis)
 		return nil
 	}
 }
@@ -95,6 +96,16 @@ func resolvePasswordService(configuration *appConfigs.EncryptionConfiguration) u
 	return userServices.NewBcryptUserPasswordService(configuration)
 }
 
-func resolveDatabaseInstance() userPorts.IUserRepository {
-	return database.NewLocalUserRepository()
+func resolveDatabaseInstance(configuration appConfigs.DatabaseConfiguration) userPorts.IUserRepository {
+	switch configuration.Name {
+	case appConstants.SQLite, appConstants.Postgres:
+		log.Println("SQLite database instance selected")
+		return database.NewGormUserRepository(configuration)
+	case appConstants.InMemory:
+		log.Println("InMemory database instance selected")
+		return database.NewLocalUserRepository()
+	default:
+		log.Fatalf("No database instance selected, available options are: %s, %s, %s", appConstants.InMemory, appConstants.SQLite, appConstants.Postgres)
+		return nil
+	}
 }

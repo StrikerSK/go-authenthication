@@ -16,7 +16,7 @@ type MemcacheCache struct {
 }
 
 func NewMemcacheCache(configuration config.CacheConfiguration) (connection MemcacheCache) {
-	address := cacheUrsResolver(configuration)
+	address := cacheUrlResolver(configuration)
 
 	cacheConnection := memcache.New(address)
 
@@ -35,7 +35,7 @@ func NewMemcacheCache(configuration config.CacheConfiguration) (connection Memca
 	}
 }
 
-func (receiver MemcacheCache) CreateCache(ctx context.Context, inputUser domain.UserDTO) error {
+func (receiver MemcacheCache) CreateCache(ctx context.Context, inputUser *domain.UserDTO) error {
 	userData, err := json.Marshal(inputUser)
 	if err != nil {
 		return err
@@ -55,22 +55,20 @@ func (receiver MemcacheCache) CreateCache(ctx context.Context, inputUser domain.
 	return nil
 }
 
-func (receiver MemcacheCache) RetrieveCache(ctx context.Context, username string) (domain.UserDTO, bool, error) {
-	var user domain.UserDTO
-
-	item, err := receiver.cacheClient.Get(username)
+func (receiver MemcacheCache) RetrieveCache(ctx context.Context, user *domain.UserDTO) (bool, error) {
+	item, err := receiver.cacheClient.Get(cachePrefix + user.Username)
 	if err != nil {
 		if err.Error() == memcache.ErrCacheMiss.Error() {
-			return domain.UserDTO{}, false, nil
+			return false, nil
 		} else {
-			return domain.UserDTO{}, false, err
+			return false, err
 		}
 	}
 
-	err = user.UnmarshalBinary(item.Value)
+	err = json.Unmarshal(item.Value, user)
 	if err != nil {
-		return domain.UserDTO{}, false, err
+		return false, err
 	}
 
-	return user, true, nil
+	return true, nil
 }

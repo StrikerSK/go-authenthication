@@ -17,3 +17,6 @@ Cache:
     Name: redis
     URL: localhost:6379
     Expiration: 300
+Database:
+    Name: sqlite
+    URL: ./custom.db

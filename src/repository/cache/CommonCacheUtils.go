@@ -8,7 +8,7 @@ import (
 
 const cachePrefix = "user:"
 
-func cacheUrsResolver(configuration config.CacheConfiguration) (address string) {
+func cacheUrlResolver(configuration config.CacheConfiguration) (address string) {
 	if configuration.URL != "" {
 		address = configuration.URL
 	} else if configuration.Host != "" && configuration.Port != "" {

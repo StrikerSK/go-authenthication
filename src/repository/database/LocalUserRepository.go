@@ -1,4 +1,4 @@
-package userRepository
+package database
 
 import (
 	"errors"
@@ -14,23 +14,24 @@ func NewLocalUserRepository() *LocalUserRepository {
 	return &LocalUserRepository{}
 }
 
-func (r *LocalUserRepository) CreateEntry(user domain.UserDTO) error {
+func (r *LocalUserRepository) CreateEntry(user *domain.UserDTO) error {
 	for _, tmpUser := range r.Users {
 		if user.Username == tmpUser.Username {
 			return errors.New(constants.ConflictConstant)
 		}
 	}
 
-	r.Users = append(r.Users, user)
+	r.Users = append(r.Users, *user)
 	return nil
 }
 
-func (r *LocalUserRepository) ReadEntry(username string) (domain.UserDTO, bool, error) {
+func (r *LocalUserRepository) ReadEntry(searchedUser *domain.UserDTO) (bool, error) {
 	for _, user := range r.Users {
-		if username == user.Username {
-			return user, true, nil
+		if searchedUser.Username == user.Username {
+			*searchedUser = user
+			return true, nil
 		}
 	}
 
-	return domain.UserDTO{}, false, errors.New(constants.NotFoundConstant)
+	return false, errors.New(constants.NotFoundConstant)
 }

@@ -36,10 +36,21 @@ type CacheConfiguration struct {
 	Expiration int    `mapstructure:"Expiration"`
 }
 
+type DatabaseConfiguration struct {
+	Type     string `mapstructure:"Type"`
+	URL      string `mapstructure:"URL"`
+	Host     string `mapstructure:"Host"`
+	Port     string `mapstructure:"Port"`
+	Name     string `mapstructure:"Name"`
+	Username string `mapstructure:"Username"`
+	Password string `mapstructure:"Password"`
+}
+
 type ApplicationConfiguration struct {
-	Application   Application        `mapstructure:"Application"`
-	Authorization Authorization      `mapstructure:"Authorization"`
-	Cache         CacheConfiguration `mapstructure:"Cache"`
+	Application   Application           `mapstructure:"Application"`
+	Authorization Authorization         `mapstructure:"Authorization"`
+	Cache         CacheConfiguration    `mapstructure:"Cache"`
+	Database      DatabaseConfiguration `mapstructure:"Database"`
 }
 
 // ReadConfiguration - read file from the current directory and marshal into the conf config struct.
