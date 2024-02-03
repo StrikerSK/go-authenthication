@@ -16,7 +16,7 @@ type MemcacheCache struct {
 }
 
 func NewMemcacheCache(configuration config.CacheConfiguration) (connection MemcacheCache) {
-	address := cacheUrsResolver(configuration)
+	address := cacheUrlResolver(configuration)
 
 	cacheConnection := memcache.New(address)
 

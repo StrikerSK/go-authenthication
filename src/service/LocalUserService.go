@@ -53,9 +53,9 @@ func (r *LocalUserService) ReadUser(ctx context.Context, searchedUser *domain.Us
 	return nil
 }
 
-func (r *LocalUserService) LoginUser(ctx context.Context, credentials domain.UserCredentials) error {
+func (r *LocalUserService) LoginUser(ctx context.Context, credentials *domain.UserCredentials) error {
 	persistedUser := domain.UserDTO{
-		UserCredentials: credentials,
+		UserCredentials: *credentials,
 	}
 
 	err := r.ReadUser(ctx, &persistedUser)
@@ -63,7 +63,7 @@ func (r *LocalUserService) LoginUser(ctx context.Context, credentials domain.Use
 		return err
 	}
 
-	return r.userPasswordService.ValidatePassword(persistedUser.UserCredentials, credentials)
+	return r.userPasswordService.ValidatePassword(&persistedUser.UserCredentials, credentials)
 }
 
 func (r *LocalUserService) fetchUser(ctx context.Context, searchedUser *domain.UserDTO) (bool, error) {

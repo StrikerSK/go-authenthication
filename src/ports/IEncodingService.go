@@ -11,5 +11,5 @@ type IEncodingService interface {
 
 type IUserPasswordService interface {
 	SetPassword(*domain.UserCredentials) error
-	ValidatePassword(domain.UserCredentials, domain.UserCredentials) error
+	ValidatePassword(*domain.UserCredentials, *domain.UserCredentials) error
 }

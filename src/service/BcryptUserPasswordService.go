@@ -35,6 +35,6 @@ func (ps *BcryptUserPasswordService) SetPassword(user *domain.UserCredentials) e
 	return nil
 }
 
-func (ps *BcryptUserPasswordService) ValidatePassword(persistedCredentials domain.UserCredentials, requestCredentials domain.UserCredentials) error {
+func (ps *BcryptUserPasswordService) ValidatePassword(persistedCredentials *domain.UserCredentials, requestCredentials *domain.UserCredentials) error {
 	return bcrypt.CompareHashAndPassword([]byte(persistedCredentials.Password), []byte(requestCredentials.Password))
 }
