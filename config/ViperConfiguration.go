@@ -2,6 +2,8 @@ package config
 
 import (
 	"github.com/spf13/viper"
+	"github.com/strikersk/user-auth/constants"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 )
 
@@ -69,12 +71,23 @@ func ReadConfiguration() *ApplicationConfiguration {
 			ContextPath: "/api",
 		},
 		Authorization: Authorization{
-			AuthorizationType:   "cookies",
+			AuthorizationType:   constants.Cookies,
 			AuthorizationHeader: "Authorization",
+			TokenEncodingType:   constants.JWT,
 			TokenExpiration:     3600,
 			JWT: JWTConfiguration{
 				TokenEncoding: "Wow, much safe",
 			},
+			Encryption: EncryptionConfiguration{
+				Cost: bcrypt.DefaultCost,
+			},
+		},
+		Cache: CacheConfiguration{
+			Name:       constants.InMemory,
+			Expiration: 3600,
+		},
+		Database: DatabaseConfiguration{
+			Type: constants.InMemory,
 		},
 	}
 

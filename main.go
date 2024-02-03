@@ -59,7 +59,7 @@ func resolveEncodingType(configuration appConfigs.Authorization) userPorts.IEnco
 		log.Println("Base64 Token encoding selected")
 		return userServices.NewBase64EncodingService()
 	default:
-		log.Fatalf("no token encoding type selected, available options: %s, %s", appConstants.JWT, appConstants.Base64)
+		log.Fatalf("No token encoding type selected, available options: %s, %s", appConstants.JWT, appConstants.Base64)
 		return nil
 	}
 }
@@ -100,7 +100,7 @@ func resolvePasswordService(configuration *appConfigs.EncryptionConfiguration) u
 }
 
 func resolveDatabaseInstance(configuration appConfigs.DatabaseConfiguration) userPorts.IUserRepository {
-	switch configuration.Name {
+	switch configuration.Type {
 	case appConstants.SQLite, appConstants.Postgres:
 		log.Println("SQLite database instance selected")
 		return database.NewGormUserRepository(configuration)
