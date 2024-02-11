@@ -1,6 +1,5 @@
 package constants
 
-// TODO Transform string values to errors
 const (
 	ConflictConstant = "user already exists"
 	NotFoundConstant = "user does not exist"
