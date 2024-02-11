@@ -58,7 +58,7 @@ type ApplicationConfiguration struct {
 // ReadConfiguration - read file from the current directory and marshal into the conf config struct.
 func ReadConfiguration() *ApplicationConfiguration {
 	viperInstance := viper.New()
-	viperInstance.SetConfigFile("/home/kristian/GolandProjects/go-authenthication/configs.yaml")
+	viperInstance.SetConfigFile("/home/kristian/GolandProjects/go-authenthication/examples/config.json")
 
 	err := viperInstance.ReadInConfig()
 	if err != nil {
