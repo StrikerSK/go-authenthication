@@ -25,7 +25,7 @@
         "Expiration": 300
     },
     "Database": {
-        "Name": "sqlite",
+        "Type": "sqlite",
         "URL": "./custom.db"
     }
 }
