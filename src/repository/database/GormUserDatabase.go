@@ -52,7 +52,7 @@ func (r *GormUserRepository) ReadEntry(user *domain.UserDTO) (bool, error) {
 }
 
 func resolveDatabase(configuration config.DatabaseConfiguration) gorm.Dialector {
-	switch configuration.Name {
+	switch configuration.Type {
 	case constants.SQLite:
 		return createSQLiteDialector(configuration)
 	case constants.Postgres:
