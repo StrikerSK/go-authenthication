@@ -19,4 +19,4 @@ Cache:
     Expiration: 300
 Database:
     Type: sqlite
-    URL: ./custom.db
+    URL: ./examples/database.db

@@ -10,6 +10,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/redis/go-redis/v9 v9.4.0
 	github.com/rs/cors v1.10.1
+	github.com/spf13/cobra v1.8.0 // indirect
 	github.com/spf13/viper v1.18.2
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/crypto v0.16.0

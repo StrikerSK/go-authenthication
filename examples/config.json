@@ -26,6 +26,6 @@
     },
     "Database": {
         "Type": "sqlite",
-        "URL": "./custom.db"
+        "URL": "./examples/database.db"
     }
 }
