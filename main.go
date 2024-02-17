@@ -1,5 +1,5 @@
 /*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
+Copyright © 2024 Kristian Hanus <kristianhanus@gmail.com>
 */
 package main
 

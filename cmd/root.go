@@ -24,8 +24,6 @@ var rootCmd = &cobra.Command{
 - Cobra CLI & Viper
 - Databases: InMemory, Postgres and SQLite
 - Caches: InMemory, MemCache and Redis`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
 		configuration := config.ApplicationConfiguration{
 			Application: config.Application{
@@ -77,7 +75,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.user-auth.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Path to configuration file")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
