@@ -40,19 +40,21 @@ func (r *GormUserRepository) CreateEntry(user *domain.UserDTO) (err error) {
 }
 
 func (r *GormUserRepository) ReadEntry(user *domain.UserDTO) (bool, error) {
-	result := r.db.Where("username = ?", user.Username).First(user)
+	err := r.db.Where("username = ?", user.Username).First(user).Error
 
-	if result.Error == nil {
-		return true, nil
-	} else if result.Error.Error() == gorm.ErrRecordNotFound.Error() {
-		return false, nil
-	} else {
-		return false, result.Error
+	if err != nil {
+		if err.Error() == gorm.ErrRecordNotFound.Error() {
+			return false, nil
+		} else {
+			return false, err
+		}
 	}
+
+	return true, nil
 }
 
 func resolveDatabase(configuration config.DatabaseConfiguration) gorm.Dialector {
-	switch configuration.Name {
+	switch configuration.Type {
 	case constants.SQLite:
 		return createSQLiteDialector(configuration)
 	case constants.Postgres:

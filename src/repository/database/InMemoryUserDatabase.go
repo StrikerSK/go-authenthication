@@ -6,15 +6,15 @@ import (
 	"github.com/strikersk/user-auth/src/domain"
 )
 
-type LocalUserRepository struct {
+type InMemoryUserDatabase struct {
 	Users []domain.UserDTO
 }
 
-func NewLocalUserRepository() *LocalUserRepository {
-	return &LocalUserRepository{}
+func NewInMemoryUserDatabase() *InMemoryUserDatabase {
+	return &InMemoryUserDatabase{}
 }
 
-func (r *LocalUserRepository) CreateEntry(user *domain.UserDTO) error {
+func (r *InMemoryUserDatabase) CreateEntry(user *domain.UserDTO) error {
 	for _, tmpUser := range r.Users {
 		if user.Username == tmpUser.Username {
 			return errors.New(constants.ConflictConstant)
@@ -25,7 +25,7 @@ func (r *LocalUserRepository) CreateEntry(user *domain.UserDTO) error {
 	return nil
 }
 
-func (r *LocalUserRepository) ReadEntry(searchedUser *domain.UserDTO) (bool, error) {
+func (r *InMemoryUserDatabase) ReadEntry(searchedUser *domain.UserDTO) (bool, error) {
 	for _, user := range r.Users {
 		if searchedUser.Username == user.Username {
 			*searchedUser = user

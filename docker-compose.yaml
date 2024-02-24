@@ -1,17 +1,25 @@
 version: '3.5'
 
 services:
-  database:
+  postgres:
     image: postgres
     ports:
       - "5432:5432"
     environment:
       POSTGRES_PASSWORD: Password
-  cache:
+    networks:
+      user-authorizaton:
+  redis:
     image: redis
     ports:
       - "6379:6379"
+    networks:
+      user-authorizaton:
   memcache:
     image: memcached
     ports:
       - "11211:11211"
+    networks:
+      user-authorizaton:
+networks:
+  user-authorizaton:
