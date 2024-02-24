@@ -18,5 +18,5 @@ Cache:
     URL: localhost:6379
     Expiration: 300
 Database:
-    Name: sqlite
-    URL: ./custom.db
+    Type: sqlite
+    URL: ./examples/database.db
